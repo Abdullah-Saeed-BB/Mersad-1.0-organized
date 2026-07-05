@@ -1,6 +1,6 @@
 {
-  "name": "مدير التصوير",
-  "short_name": "التصوير",
+  "name": "مِرصاد",
+  "short_name": "مِرصاد",
   "description": "إدارة جلسات التصوير الفيديوي",
   "start_url": "/",
   "display": "standalone",
