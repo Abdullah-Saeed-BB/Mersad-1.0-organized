@@ -15,9 +15,7 @@
 بعد الانتهاء من التصوير، صدره إلى فاينل كت، هنا يحدث السحر.. سيرتب فاينل كت كل الملفات داخل المقاطع والمشاهد، وينشئ "إفنت" للتصوير كاملا، ثم "بروجيكت" لكل مقطع، ويضع داخله كل مشهد، باسمه المكتوب في مرصاد، وسيضع عليه الملاحظات الزمنية، تلقائيا. 
 
 شرحت التطبيق ومزاياه وطريقة رفعه على خادم، على قناتي في يوتيوب هنا:
-
-<iframe width="560" height="315" src="https://www.youtube.com/watch?v=77tL-XDIPhk" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-
+[![شاهد الفيديو](https://img.youtube.com/vi/77tL-XDIPhk/maxresdefault.jpg)](https://www.youtube.com/watch?v=77tL-XDIPhk)
 
 هذه نسخة أولى، عملت عليها أكثر من ٦٠ ساعة، تطورت مع الاستخدام المتستمر في عملي في الإنتاج، وفي قناتي "قناة حاتم" على يوتيوب. 
 
