@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>مِرصاد</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="./styles/global.css" />
+
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+
+  <!-- iOS PWA -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="مِرصاد">
+  <link rel="apple-touch-icon" href="/icon-192.png">
+
+  <!-- Android / general -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="مِرصاد">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+  <link rel="stylesheet" href="./styles/index.css" />
+<!-- Google Identity Services — works inside iOS WKWebView (no redirect/popup needed) -->
+  <script src="./js/auth.js"></script>
+</head>
+<body>
+
+<a href="#mainContent" class="skip-link">تخطَّ إلى المحتوى</a>
+
+<!-- Hidden file input for avatar upload -->
+<input type="file" id="avatarFileInput" accept="image/*" style="display:none" onchange="window._mUploadAvatar(this)">
+
+<!-- Login Page -->
+<div id="loginPage" style="display:none">
+  <div class="login-card">
+    <div class="login-logo">🎬</div>
+    <div class="login-title">مِرصاد</div>
+    <div id="loginModeSub" class="login-sub">سجّل دخولك لمزامنة تصاويرك على جميع أجهزتك</div>
+    <label for="loginUser" class="sr-only">اسم المستخدم</label>
+    <input id="loginUser" class="login-input" type="text" placeholder="اسم المستخدم" autocomplete="username" aria-label="اسم المستخدم">
+    <div style="position:relative;width:100%">
+      <label for="loginPass" class="sr-only">كلمة المرور</label>
+      <input id="loginPass" class="login-input" type="password" placeholder="كلمة المرور" autocomplete="current-password" style="padding-left:44px" aria-label="كلمة المرور">
+      <button type="button" onclick="togglePassView()" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px;color:var(--subtext);line-height:1" aria-label="إظهار/إخفاء كلمة المرور">
+        <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+    </div>
+    <label for="loginPassConfirm" class="sr-only">تأكيد كلمة المرور</label>
+    <input id="loginPassConfirm" class="login-input" type="password" placeholder="تأكيد كلمة المرور" autocomplete="new-password" style="display:none" aria-label="تأكيد كلمة المرور">
+    <div id="registerWarnings" style="display:none;width:100%;text-align:right;font-size:13px;line-height:1.7;color:#cc0000;background:rgba(204,0,0,0.07);border:1px solid rgba(204,0,0,0.25);border-radius:12px;padding:12px 14px;margin-top:2px;margin-bottom:2px">
+      <div style="font-weight:700;margin-bottom:4px">⚠️ تنبيه</div>
+      <div>هذا التطبيق برمجه شخص غير متخصص.</div>
+      <div>لا تختر كلمة سر مستخدمة في حسابات أخرى — اختر كلمة سر لهذا التطبيق فقط، حماية لكلمات سرك الأخرى في حال تسربت بيانات هذا التطبيق لا سمح الله، علماً أنني اتبعت أعلى درجات الحماية بإذن الله.</div>
+      <div style="margin-top:8px;font-weight:700">⚠️ تنبيه ثانٍ!</div>
+      <div>جميع البيانات المكتوبة داخل التطبيق مرئية لي. إذا كنت تريد كتابة بيانات خاصة، انسخ التطبيق من GitHub وارفعه على خادم خاص بك بحيث يصبح مستقلاً تماماً.</div>
+    </div>
+    <button id="loginSubmitBtn" class="login-btn" onclick="signInLocal()" disabled style="opacity:0.6">جارٍ التحميل...</button>
+    <div id="loginError" style="color:var(--red);font-size:13px;margin-top:-8px;display:none"></div>
+    <button class="login-migrate-btn" onclick="toggleAuthMode()">إنشاء حساب جديد</button>
+    <div style="text-align:center;font-family:var(--font-display);font-size:13px;color:var(--subtext);margin-top:16px;opacity:0.7;padding:0 8px">برمجهُ وأهداهُ للمصورين: حاتم النجار</div>
+  </div>
+</div>
+
+<header class="topbar" role="banner">
+  <div class="topbar-left" id="topLeft">
+      <div class="brand">
+        <div class="brand-icon">🎬</div>مِرصاد
+      </div>
+  </div>
+  <div class="topbar-right" id="topRight"></div>
+  <div style="display:flex;align-items:center;gap:8px;margin-right:4px">
+    <div id="syncStatus" style="display:none" title="حالة المزامنة" onclick="_onSyncDotClick()">
+      <div class="sync-dot"></div>
+      <span id="syncText">—</span>
+    </div>
+    <div id="userPill" style="display:none"></div>
+    <button id="loginBtn" class="btn btn-filled btn-sm" onclick="signInLocal()">تسجيل الدخول</button>
+  </div>
+</header>
+
+<div id="mainContent" tabindex="-1"></div>
+
+<div id="homePage" class="page active" role="main">
+  <div class="home-wrap">
+    <div class="home-hero">
+      <div>
+        <h1 id="homeTitle">الملفات</h1>
+        <div class="home-hero-sub" id="homeSubtitle"></div>
+      </div>
+      <div id="homeActions" class="home-actions">
+        <div class="home-view-toggle">
+          <button class="home-view-btn" id="homeViewFiles"  onclick="setHomeViewMode('files')"  title="الملفات"  aria-label="عرض الملفات">📁</button>
+          <button class="home-view-btn" id="homeViewKanban" onclick="setHomeViewMode('kanban')" title="كان بان"  aria-label="عرض كانبان">⊟</button>
+          <button class="home-view-btn" id="homeViewList"   onclick="setHomeViewMode('list')"   title="قائمة"    aria-label="عرض قائمة">☰</button>
+          <div style="position:relative">
+            <button class="home-view-btn" onclick="toggleCreateDrop()" id="createDropBtn" title="جديد" aria-label="إنشاء جديد" aria-haspopup="true" aria-expanded="false">🌱</button>
+            <div id="createDropMenu" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--surface-2);color:var(--text-1);border:1px solid var(--border);border-radius:12px;padding:6px 0;min-width:160px;box-shadow:0 8px 24px rgba(0,0,0,0.25);z-index:500;backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px)">
+              <div onclick="createProject();document.getElementById('createDropMenu').style.display='none'" style="padding:10px 16px;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:8px;color:var(--text-1)">🎬 تصوير جديد</div>
+              <div onclick="createFolder();document.getElementById('createDropMenu').style.display='none'" style="padding:10px 16px;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:8px;color:var(--text-1)">📁 ملف جديد</div>
+            </div>
+          </div>
+          <div style="position:relative">
+            <button class="home-view-btn" onclick="toggleImportDrop()" id="importDropBtn" title="استيراد" aria-label="استيراد" aria-haspopup="true" aria-expanded="false">⬇️</button>
+            <div id="importDropMenu" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--surface-2);color:var(--text-1);border:1px solid var(--border);border-radius:12px;padding:6px 0;min-width:150px;box-shadow:0 8px 24px rgba(0,0,0,0.25);z-index:500;backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px)">
+              <div onclick="importExcel();document.getElementById('importDropMenu').style.display='none'" style="padding:10px 16px;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:8px;color:var(--text-1)">📊 Excel</div>
+              <div onclick="importProject();document.getElementById('importDropMenu').style.display='none'" style="padding:10px 16px;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:8px;color:var(--text-1)">📂 JSON</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="folderActions" style="display:none;align-items:center;gap:10px"></div>
+    </div>
+
+    <div id="homeContent"></div>
+  </div>
+</div>
+
+<div id="projectPage" class="page" role="main">
+  <div class="proj-wrap">
+    <div class="info-card collapsed" id="infoCard">
+      <div class="info-card-header" onclick="toggleInfo()" role="button" tabindex="0" aria-expanded="false" aria-controls="infoCardBody" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleInfo()}">
+        <div class="info-head-summary">
+          <span class="info-head-name" id="infoHeadName">—</span>
+        </div>
+        <span class="chevron" aria-hidden="true">▼</span>
+      </div>
+      <div class="info-card-body" id="infoCardBody">
+        <div class="progress-card" style="margin-bottom:12px">
+          <div class="progress-section">
+            <span class="progress-label">المقاطع</span>
+            <div class="p-track"><div class="p-fill p-fill-seg" id="pFillSeg" style="transform:scaleX(0)"></div></div>
+            <span class="p-count" id="pCountSeg">0 / 0</span>
+          </div>
+          <div class="progress-divider"></div>
+          <div class="progress-section">
+            <span class="progress-label">المشاهد</span>
+            <div class="p-track"><div class="p-fill" id="pFill" style="transform:scaleX(0)"></div></div>
+            <span class="p-count" id="pCount">0 / 0</span>
+          </div>
+        </div>
+        <div class="info-inline-row">
+          <div class="info-inline-field" style="flex:2"><label>اسم المشروع</label><input type="text" id="pName" placeholder="اسم المشروع" oninput="onNameChange()"></div>
+          <div class="info-inline-sep"></div>
+          <div class="info-inline-field" style="flex:1;flex-shrink:0"><label>تاريخ التصوير</label>
+            <input type="date" id="pDate" style="position:absolute;opacity:0;width:1px;height:1px" onchange="updateDateDisplay()">
+            <span id="pDateDisplay" style="font-size:13px;font-weight:600;color:var(--text-1);cursor:pointer;white-space:nowrap" onclick="document.getElementById('pDate').showPicker?document.getElementById('pDate').showPicker():document.getElementById('pDate').click()">—</span>
+          </div>
+          <input type="hidden" id="pLocation">
+        </div>
+        <textarea id="pNotes" style="display:none"></textarea>
+        <div class="prep-section">
+          <div class="info-card-label" style="margin:14px 0 8px">☑ قائمة التجهيز</div>
+          <div class="prep-progress" id="prepProgress" style="display:none">
+            <div class="prep-progress-track"><div class="prep-progress-fill" id="prepProgressFill"></div></div>
+            <span class="prep-progress-label" id="prepProgressLabel"></span>
+          </div>
+          <div class="prep-tasks-list" id="prepTasksList"></div>
+          <div class="prep-add-row">
+            <textarea id="prepTaskInput" placeholder="أضف مهمة... (أو الصق عدة مهام بينهم إنتر)" rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();addPrepTask()}" oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,160)+'px'"></textarea>
+            <button class="btn btn-filled btn-sm" onclick="addPrepTask()">+ إضافة</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="shots-sticky-header">
+    <div class="shots-bar">
+      <select class="fps-select" id="gFPS" onchange="saveFPS()" style="display:none" aria-label="معدل الإطارات في الثانية">
+        <option value="24">24</option><option value="25" selected>25</option>
+        <option value="30">30</option><option value="60">60</option>
+      </select>
+      <button class="btn btn-glass btn-sm mobile-hide" id="collapseAllBtn" onclick="toggleAllSegments()" title="فتح/إغلاق" aria-label="فتح/إغلاق جميع المقاطع">▼▲</button>
+      <button class="btn btn-glass btn-sm" onclick="addSegment()">+ مقطع</button>
+      <div class="view-drop-wrap" id="viewDropWrap">
+        <button class="btn btn-glass btn-sm view-drop-btn" id="viewDropBtn" aria-label="خيارات العرض" aria-haspopup="true" aria-expanded="false">👁▾</button>
+      </div>
+
+      <div class="sf-divider shots-bar-divider" id="shotsBarFilterDivider" style="display:none"></div>
+      <button class="sf-chip sf-active" id="sfDoneAll"     onclick="setShotFilter('done','all')"     style="display:none">الكل</button>
+      <button class="sf-chip"           id="sfDoneDone"    onclick="setShotFilter('done','done')"    style="display:none" aria-label="المشاهد المنجزة">✅</button>
+      <button class="sf-chip"           id="sfDonePending" onclick="setShotFilter('done','pending')" style="display:none" aria-label="المشاهد قيد الانتظار">⏳</button>
+      <div class="sf-divider sf-rukn-div" id="sfRuknDiv" style="display:none"></div>
+      <select class="sf-select sf-col-btn" id="sfFaceSel" onchange="setShotFilter('face',this.value)" style="display:none" aria-label="فلترة بالوجه">
+        <option value="">الكل</option>
+      </select>
+      <select class="sf-select" id="sfRuknSel" style="display:none" onchange="setShotFilter('rukn',this.value)" aria-label="فلترة بالركن">
+        <option value="">الكل</option>
+      </select>
+      <div class="sf-divider" id="sfColDivider" style="display:none"></div>
+      <div style="position:relative;display:none" id="sfColWrap">
+        <button class="sf-col-btn" id="sfColBtn" onclick="toggleColDropdown(event)" title="إظهار/إخفاء الأعمدة" aria-label="إظهار/إخفاء الأعمدة" aria-haspopup="true" aria-expanded="false">
+          <span aria-hidden="true">⊞</span><span style="font-size:10px" aria-hidden="true">▾</span>
+        </button>
+      </div>
+      <div class="mini-prog" id="miniProg">
+        <div class="mini-prog-item" title="المقاطع المكتملة">
+          <span class="mini-prog-label">مقاطع</span>
+          <div class="mini-prog-track"><div class="mini-prog-fill mini-prog-fill-seg" id="miniFillSeg"></div></div>
+          <span class="mini-prog-count" id="miniCountSeg">0/0</span>
+        </div>
+        <div class="mini-prog-item" title="المشاهد المنجزة">
+          <span class="mini-prog-label">مشاهد</span>
+          <div class="mini-prog-track"><div class="mini-prog-fill" id="miniFill"></div></div>
+          <span class="mini-prog-count" id="miniCount">0/0</span>
+        </div>
+      </div>
+    </div>
+    </div><!-- /shots-sticky-header -->
+
+    <div id="shotsList"></div>
+    <div id="projTrashPanel" style="margin-top:16px"></div>
+    <div id="shotsEmpty" class="shots-empty" style="display:none">
+      <div class="shots-empty-icon">🎬</div>
+      <h3>لا توجد مقاطع بعد</h3>
+      <p>أضف مقطعاً لتنظيم مشاهد تصويرك وتتبع التقدم</p>
+      <div class="shots-empty-btns">
+        <button class="btn btn-filled" onclick="addSegment()">+ إضافة مقطع</button>
+        <button class="btn btn-glass" onclick="importExcel()">📊 استيراد Excel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="fileInput" accept=".json,.md" style="display:none" onchange="handleImport(event)">
+<input type="file" id="xlsxInput" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleExcelImport(event)">
+
+<!-- Rich Text Editor Modal -->
+<!-- Share Modal -->
+<div class="share-overlay" id="shareOverlay" style="display:none" onclick="if(event.target===this)closeShareModal()">
+  <div class="share-modal">
+    <h2>🔗 مشاركة المشروع</h2>
+    <p id="shareDesc" style="font-size:13px;color:var(--subtext);margin:0;line-height:1.5"></p>
+    <div id="shareModeRow" style="display:flex;gap:16px;margin:10px 0 4px;align-items:center;font-size:13px">
+      <span style="color:var(--subtext)">نوع الرابط:</span>
+      <label style="display:flex;align-items:center;gap:5px;cursor:pointer">
+        <input type="radio" name="shareMode" value="view" id="shareModeView" checked>
+        <span>مشاهدة فقط</span>
+      </label>
+      <label style="display:flex;align-items:center;gap:5px;cursor:pointer">
+        <input type="radio" name="shareMode" value="edit" id="shareModeEdit">
+        <span>تحرير</span>
+      </label>
+    </div>
+    <div class="share-link-row" id="shareLinkRow" style="display:none">
+      <input class="share-link-input" id="shareLinkInput" type="text" readonly onclick="this.select()">
+      <button class="btn btn-glass btn-sm" onclick="copyShareLink()">نسخ</button>
+    </div>
+    <div class="share-status" id="shareStatus"></div>
+    <div class="share-modal-btns">
+      <button class="btn btn-glass btn-sm" onclick="closeShareModal()">إغلاق</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-glass btn-sm" id="shareRevokeBtn" onclick="revokeShare()" style="display:none">إلغاء المشاركة</button>
+        <button class="btn btn-filled btn-sm" id="shareGenBtn" onclick="generateShare()">إنشاء رابط</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Folder Share Modal -->
+<div class="share-overlay" id="folderShareOverlay" style="display:none" onclick="if(event.target===this)closeFolderShare()">
+  <div class="fsh-modal">
+    <div class="fsh-header">
+      <h2>👥 مشاركة الملف</h2>
+      <span class="fsh-folder-name" id="fshFolderName"></span>
+    </div>
+    <div>
+      <div class="fsh-section-label" style="margin-bottom:8px">دعوة شخص جديد</div>
+      <div class="fsh-invite-row">
+        <input type="text" id="fshEmail" class="fsh-email-input" placeholder="اسم المستخدم..." dir="ltr" onkeydown="if(event.key==='Enter')fshInvite()">
+        <div class="fsh-invite-controls">
+          <select id="fshRole" class="fsh-role-select">
+            <option value="editor">محرر</option>
+            <option value="viewer">مشاهد</option>
+          </select>
+          <button class="btn btn-filled btn-sm" onclick="fshInvite()" style="white-space:nowrap">دعوة</button>
+        </div>
+      </div>
+    </div>
+    <div class="fsh-status" id="fshStatus"></div>
+    <div>
+      <div class="fsh-section-label" style="margin-bottom:8px">الأعضاء الحاليون</div>
+      <div class="fsh-members" id="fshMembers"><div style="color:var(--text-3);font-size:13px">لا يوجد أعضاء بعد</div></div>
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:4px">
+      <div class="fsh-section-label" style="margin-bottom:8px">🔗 رابط مشاركة الملف</div>
+      <div style="font-size:12px;color:var(--subtext);margin-bottom:8px">أي شخص لديه الرابط يمكنه عرض الملف (مشاهدة فقط)</div>
+      <div class="share-link-row" id="fshLinkRow" style="display:none">
+        <input class="share-link-input" id="fshLinkInput" type="text" readonly onclick="this.select()" dir="ltr">
+        <button class="btn btn-glass btn-sm" onclick="fshCopyLink()">نسخ</button>
+      </div>
+      <div class="fsh-status" id="fshLinkStatus"></div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn btn-glass btn-sm" id="fshLinkRevokeBtn" onclick="fshRevokeLink()" style="display:none">إلغاء الرابط</button>
+        <button class="btn btn-filled btn-sm" id="fshLinkGenBtn" onclick="fshGenerateLink()">إنشاء رابط</button>
+      </div>
+    </div>
+    <div class="share-modal-btns" style="margin-top:12px">
+      <button class="btn btn-glass btn-sm" onclick="closeFolderShare()">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<!-- Folder Link View Page -->
+<div id="folderLinkPage" class="page" style="display:none">
+  <div class="home-wrap" style="max-width:900px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;flex-wrap:wrap">
+      <div>
+        <h1 id="flpFolderName" style="margin:0;font-size:22px"></h1>
+        <div style="font-size:13px;color:var(--subtext);margin-top:4px">👁 عرض فقط · مشترك بواسطة <span id="flpOwnerName"></span></div>
+      </div>
+    </div>
+    <div id="flpProjectList" style="display:flex;flex-direction:column;gap:12px"></div>
+  </div>
+</div>
+
+<!-- View-only banner -->
+<div class="viewonly-banner" id="viewonlyBanner" style="display:none">
+  <span class="viewonly-text">👁 أنت تعرض هذا المشروع بوضع القراءة فقط</span>
+  <button class="btn btn-filled btn-sm" onclick="claimSharedProject()" id="claimBtn">إضافة إلى مشاريعي</button>
+</div>
+<div class="viewonly-banner" id="editShareBanner" style="display:none;background:linear-gradient(135deg,#1a6b3a,#2d8a50)">
+  <span class="viewonly-text">✏️ أنت تحرر هذا المشروع عبر رابط مشاركة</span>
+  <button class="btn btn-filled btn-sm" onclick="claimSharedProject()" id="claimEditBtn">إضافة إلى مشاريعي</button>
+</div>
+
+<!-- Text Import Modal -->
+<div class="ti-overlay" id="tiOverlay" style="display:none" onclick="if(event.target===this)closeTextImport()">
+  <div class="ti-modal">
+    <h2 id="tiTitle">📝 تحويل نص إلى مشاهد</h2>
+    <div class="ti-hint">
+      استخدم <strong>#</strong> لاسم المقطع و <strong>##</strong> لاسم المشهد والنص تحته يصبح محتوى المشهد.<br>
+      مثال: <code># مقطع الافتتاحية</code> ثم <code>## مشهد الوصول</code>
+    </div>
+    <textarea id="tiText" placeholder="# اسم المقطع الأول&#10;## اسم المشهد الأول&#10;وصف المشهد...&#10;&#10;## اسم المشهد الثاني&#10;&#10;# اسم المقطع الثاني&#10;## مشهد آخر" oninput="previewTextImport()"></textarea>
+    <div class="ti-preview" id="tiPreview" style="display:none"></div>
+    <div class="ti-btns">
+      <button class="btn btn-glass btn-sm" onclick="closeTextImport()">إلغاء</button>
+      <button class="btn btn-filled btn-sm" id="tiImportBtn" onclick="doTextImport()" disabled>تحويل</button>
+    </div>
+  </div>
+</div>
+
+<!-- Move to folder modal -->
+<div class="mf-overlay" id="mfOverlay" style="display:none" onclick="if(event.target===this)closeMoveModal()">
+  <div class="mf-modal">
+    <h3>نقل التصوير إلى ملف</h3>
+    <div id="mfOptions"></div>
+    <div class="mf-btns">
+      <button class="btn btn-glass btn-sm" onclick="closeMoveModal()">إلغاء</button>
+      <button class="btn btn-filled btn-sm" onclick="confirmMove()">نقل</button>
+    </div>
+  </div>
+</div>
+
+<!-- Segment Fullscreen -->
+<div class="segf-overlay" id="segfOverlay" style="display:none">
+  <div class="segf-topbar">
+    <button class="segf-back" onclick="closeSegFull()">←</button>
+    <input type="text" class="segf-title-input" id="segfTitle" placeholder="عنوان المقطع"
+      oninput="segfSetTitle(this.value)" onchange="autoSave()">
+    <input type="text" class="seg-face-input" id="segfFaceInput" placeholder="الوجه"
+      style="font-size:14px;padding:6px 10px;width:8em"
+      oninput="segfSetFace(this.value)">
+    <span class="segf-stats" id="segfStats"></span>
+  </div>
+  <div class="segf-progress-bar"><div class="segf-progress-fill" id="segfFill" style="transform:scaleX(0)"></div></div>
+  <div class="segf-body" id="segfBody"></div>
+</div>
+
+<!-- Move segment to project modal -->
+<div class="mf-overlay" id="msOverlay" style="display:none" onclick="if(event.target===this)closeMoveSegModal()">
+  <div class="mf-modal">
+    <h3>نقل المقطع إلى مشروع</h3>
+    <div class="ms-hint" id="msHint"></div>
+    <input type="text" class="ms-search" id="msSearch" placeholder="🔍 ابحث عن مشروع...">
+    <div class="ms-proj-list" id="msProjList"></div>
+    <div class="mf-btns">
+      <button class="btn btn-glass btn-sm" onclick="closeMoveSegModal()">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- Segment Link Modal -->
+<div class="mf-overlay" id="segLinkOverlay" style="display:none" onclick="if(event.target===this)closeSegLinkModal()">
+  <div class="mf-modal" style="max-width:360px">
+    <h3 id="segLinkModalTitle">رابط المقطع</h3>
+    <div id="segLinkViewMode" style="display:none">
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn btn-primary" style="flex:1" onclick="segLinkOpen()">فتح الرابط ↗</button>
+        <button class="btn btn-glass btn-sm" onclick="segLinkEdit()">تعديل</button>
+      </div>
+    </div>
+    <div id="segLinkEditMode">
+      <input type="url" id="segLinkInput" placeholder="https://..." class="seg-link-modal-input"
+             onkeydown="if(event.key==='Enter')segLinkSave()">
+      <div class="mf-btns" style="margin-top:10px">
+        <button class="btn btn-primary" onclick="segLinkSave()">حفظ</button>
+        <button class="btn btn-glass btn-sm" onclick="closeSegLinkModal()">إلغاء</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Shot Fullscreen -->
+<div class="sf-overlay" id="sfOverlay" style="display:none">
+  <div class="sf-topbar">
+    <div class="sf-topbar-left">
+      <div class="sf-num" id="sfNum">1</div>
+      <input type="text" class="sf-title-input" id="sfTitleInput" placeholder="عنوان المشهد" aria-label="عنوان المشهد">
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <button class="btn btn-glass btn-sm" onclick="sfNavigate(-1)" id="sfPrevBtn" title="المشهد السابق" aria-label="المشهد السابق" style="font-size:16px;padding:4px 10px">‹</button>
+      <button class="btn btn-glass btn-sm" onclick="sfNavigate(1)"  id="sfNextBtn" title="المشهد التالي"  aria-label="المشهد التالي" style="font-size:16px;padding:4px 10px">›</button>
+      <span id="sfSyncPill" class="sf-sync-pill" title="حالة الحفظ" role="status" aria-label="حالة الحفظ" onclick="_onSavePillClick()"></span>
+      <button class="btn btn-glass btn-sm" id="btConnectBtn" onclick="btConnect()" title="ربط كاميرا Sony FX3 عبر البلوتوث" aria-label="ربط كاميرا Sony FX3 عبر البلوتوث">
+        <span id="btStatusDot"></span>📡 FX3
+      </button>
+      <button class="btn btn-glass btn-sm bt-record-ready" id="btRecordBtn" onclick="btToggleRecord()" title="بدء/إيقاف التسجيل" aria-label="بدء/إيقاف التسجيل">⏺ تسجيل</button>
+      <input type="checkbox" id="sfDoneCb" style="width:16px;height:16px;cursor:pointer">
+      <label for="sfDoneCb" style="font-size:13px;color:var(--subtext);cursor:pointer">تم ✓</label>
+      <button class="btn btn-glass btn-sm" onclick="closeShotFull()" aria-label="إغلاق المشهد">✕ إغلاق</button>
+    </div>
+  </div>
+  <div class="sf-body">
+
+    <!-- Right column: all fields -->
+    <div class="sf-fields-col">
+
+      <!-- ─── Inline Teleprompter Panel ─── -->
+      <div id="sfTpPanel" style="display:none">
+        <div class="sf-tp-head">
+          <span class="sf-tp-title">📺 القارئ</span>
+          <div style="display:flex;gap:8px">
+            <button class="sf-tp-ext-btn" onclick="tpFullscreen()">⛶ ملء الشاشة</button>
+            <button class="sf-tp-ext-btn" id="sfTpMirrorBtn" onclick="tpToggleMirror()">🪞 معكوس</button>
+            <button class="sf-tp-ext-btn" onclick="tpOpenDisplay()">🖥 نافذة مستقلة</button>
+            <button class="sf-tp-cls-btn" onclick="closeTp()">✕</button>
+          </div>
+        </div>
+        <div class="sf-tp-controls">
+          <button class="sf-tp-play-btn" id="sfTpPlayBtnT" onclick="tpTogglePlay()">▶ تشغيل</button>
+          <button class="sf-tp-ctrl-btn" onclick="tpReset()">↩ إعادة</button>
+          <div class="sf-tp-slider-grp">
+            <span>السرعة</span>
+            <input type="range" id="sfTpSpeedSliderT" min="0.2" max="5" step="0.1" value="1" oninput="tpSetSpeed(this.value)" aria-label="سرعة التمرير">
+            <span id="sfTpSpeedValT">1x</span>
+          </div>
+          <div class="sf-tp-slider-grp">
+            <span>الحجم</span>
+            <input type="range" id="sfTpFontSliderT" min="24" max="120" step="4" value="52" oninput="tpSetFont(this.value)" aria-label="حجم الخط">
+            <span id="sfTpFontValT">52px</span>
+          </div>
+          <div class="sf-tp-slider-grp">
+            <span>━</span>
+            <input type="range" id="sfTpLineSlider" min="1" max="100" step="1" value="2" oninput="tpSetLineSize(this.value)" aria-label="موضع خط القراءة">
+            <span id="sfTpLineVal">2px</span>
+          </div>
+        </div>
+        <button class="sf-tp-scroll-btn" onpointerdown="tpStartScroll(-1)" onpointerup="tpStopScroll()" onpointerleave="tpStopScroll()" aria-label="تمرير للأعلى">▲</button>
+        <div class="sf-tp-preview">
+          <div class="sf-tp-fade-top"></div>
+          <div class="sf-tp-reading-line"></div>
+          <div id="sfTpScroll">
+            <div id="sfTpText"></div>
+          </div>
+          <div class="sf-tp-fade-bot"></div>
+        </div>
+        <button class="sf-tp-scroll-btn" onpointerdown="tpStartScroll(1)" onpointerup="tpStopScroll()" onpointerleave="tpStopScroll()" aria-label="تمرير للأسفل">▼</button>
+      </div>
+
+      <div class="sf-field">
+        <label style="display:flex;align-items:center;justify-content:space-between">
+          <span>المحتوى</span>
+          <button onclick="openEditorCurrent()" style="font-size:10px;padding:2px 7px;border-radius:5px;background:var(--surface-2);border:1px solid var(--border);color:var(--subtext);cursor:pointer">✏️ محرر</button>
+          <button onclick="openTp()" style="font-size:10px;padding:2px 7px;border-radius:5px;background:rgba(100,210,255,0.08);border:1px solid rgba(100,210,255,0.25);color:#64d2ff;cursor:pointer" id="sfTpToggleBtn">📺 القارئ</button>
+        </label>
+        <textarea id="sfContent" placeholder="وصف محتوى المشهد..." rows="5"></textarea>
+      </div>
+
+      <div class="sf-row2">
+        <div class="sf-field">
+          <label>التصوير</label>
+          <textarea id="sfShooting" placeholder="الزاوية، الحركة، العدسة، الإضاءة..."></textarea>
+        </div>
+        <div class="sf-field">
+          <label>المونتاج</label>
+          <textarea id="sfEditMusic" placeholder="المونتاج، الموسيقى، المؤثرات..."></textarea>
+        </div>
+      </div>
+      <div class="sf-field">
+        <label>الوجه</label>
+        <input type="text" id="sfFace" placeholder="اسم الشخص أو الوجه في المشهد...">
+      </div>
+      <div class="sf-row2">
+        <div class="sf-field">
+          <label>اسم الملف — الكاميرا A</label>
+          <input type="text" id="sfFilename" placeholder="الكاميرا A" inputmode="numeric">
+        </div>
+        <div class="sf-field">
+          <label>اسم الملف — الكاميرا B</label>
+          <input type="text" id="sfFilename2" placeholder="الكاميرا B (اختياري)" inputmode="numeric">
+        </div>
+        <div class="sf-field">
+          <label>اسم الملف — الكاميرا C</label>
+          <input type="text" id="sfFilename3" placeholder="الكاميرا C (اختياري)" inputmode="numeric">
+        </div>
+        <div class="sf-field">
+          <label>اسم الملف — الكاميرا D</label>
+          <input type="text" id="sfFilename4" placeholder="الكاميرا D (اختياري)" inputmode="numeric">
+        </div>
+      </div>
+    </div>
+
+    <!-- Left column: timecode notes -->
+    <div class="sf-tc-col">
+      <div class="sf-tc-section">
+        <div class="sf-tc-label">⏱ ملاحظات التحرير</div>
+        <div class="tc-row">
+          <span class="tc-clock" id="sfTcClock">00:00:00:00</span>
+          <button class="btn btn-glass btn-sm tc-reset-inline" onclick="sfResetTimer()" aria-label="إعادة ضبط المؤقت">⏹</button>
+          <div class="tc-btns">
+            <button class="btn btn-green btn-sm" id="sfTcStart" onclick="sfStartTimer()">▶ تشغيل</button>
+            <button class="btn btn-glass btn-sm" id="sfTcPause" onclick="sfPauseTimer()" style="display:none">⏸ إيقاف</button>
+          </div>
+        </div>
+        <div class="tc-input-row">
+          <div class="tc-note-input-wrap">
+            <input type="text" id="sfNoteInput" placeholder="اكتب ملاحظتك ثم اضغط Enter" onkeypress="if(event.key==='Enter') sfAddNote()">
+            <button class="tc-note-add-btn" onclick="sfAddNote()" aria-label="إضافة ملاحظة">+</button>
+          </div>
+        </div>
+        <div class="tc-presets" id="sfPresets">
+          <button class="tc-preset-btn tc-preset-green" onclick="sfAddNotePreset('إلى هنا ممتاز')">إلى هنا ممتاز</button>
+          <button class="tc-preset-btn tc-preset-red" onclick="sfAddNotePreset('احذف قبل')">احذف قبل</button>
+          <!-- custom presets injected here -->
+          <button class="tc-add-preset-btn" onclick="sfShowAddPreset()" id="sfAddPresetBtn">＋ زر جديد</button>
+        </div>
+        <div class="tc-preset-input-row" id="sfPresetInputRow">
+          <input type="text" id="sfPresetInput" placeholder="اكتب نص الزر الجديد..." onkeypress="if(event.key==='Enter') sfSavePreset()">
+          <button class="btn btn-filled btn-sm" onclick="sfSavePreset()">حفظ</button>
+          <button class="btn btn-glass btn-sm" onclick="sfHideAddPreset()">إلغاء</button>
+        </div>
+        <div class="tc-notes-list" id="sfNotesList"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FCP Export Modal -->
+<div class="fcp-overlay" id="fcpOverlay" style="display:none" onclick="if(event.target===this)closeFcpModal()">
+  <div class="fcp-modal">
+    <h2>🎬 تصدير إلى Final Cut Pro</h2>
+
+
+    <div>
+      <label style="font-size:12px;color:var(--text-2);display:block;margin-bottom:8px;font-weight:500">📁 مجلد ملفات الفيديو</label>
+      <div class="fcp-folder-row">
+        <input type="text" id="fcpFolderInput" placeholder="اسحب المجلد هنا من Finder أو الصق المسار" oninput="fcpOnFolderInput()"
+          ondragover="event.preventDefault();this.style.outline='2px solid var(--accent)'"
+          ondragleave="this.style.outline=''"
+          ondrop="fcpDropFolder(event)" />
+        <button class="btn btn-glass btn-sm" onclick="fcpPickFiles()" title="اختر ملفات الفيديو مباشرة من Finder">📂 اختر</button>
+        <input type="file" id="fcpFilePickerInput" webkitdirectory style="display:none" onchange="fcpHandleFilePick(this.files)"/>
+      </div>
+      <div style="font-size:11px;color:var(--text-2);margin-top:4px;text-align:right"></div>
+      <div class="fcp-quick-btns" style="margin-top:8px">
+        <button onclick="fcpSetFolder('~/Movies')">~/Movies</button>
+        <button onclick="fcpSetFolder('~/Desktop')">~/Desktop</button>
+        <button onclick="fcpSetFolder('~/Downloads')">~/Downloads</button>
+        <button onclick="fcpSetFolder('~/Documents')">~/Documents</button>
+      </div>
+    </div>
+
+
+
+
+    <div id="fcpStatus" class="fcp-status">اختر مجلد الفيديو أعلاه ثم اضغط بحث.</div>
+
+    <div class="fcp-row-btns">
+      <button class="btn btn-glass btn-sm" onclick="closeFcpModal()">إلغاء</button>
+      <button class="btn btn-filled btn-sm" id="fcpDownloadBtn" onclick="fcpDownload()">
+        ⬇ تحميل FCPXML
+      </button>
+      <button class="btn btn-glass btn-sm" id="fcpAppBtn" onclick="fcpLaunchApp()">
+        🖥 فتح عبر التطبيق
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="re-overlay" id="reOverlay" style="display:none">
+  <div class="re-wrap">
+    <div class="re-topbar">
+      <span class="re-title" id="reTitle">المحتوى</span>
+      <div class="re-actions">
+        <button class="btn btn-glass btn-sm" onclick="closeEditor(false)">إلغاء</button>
+        <button class="btn btn-filled btn-sm" onclick="closeEditor(true)">حفظ وإغلاق</button>
+      </div>
+    </div>
+
+    <div class="re-toolbar" id="reToolbar">
+      <!-- Block style -->
+      <select class="tb-select" onchange="execCmd('formatBlock',this.value); this.blur()">
+        <option value="p">فقرة</option>
+        <option value="h1">عنوان 1</option>
+        <option value="h2">عنوان 2</option>
+        <option value="h3">عنوان 3</option>
+        <option value="blockquote">اقتباس</option>
+      </select>
+
+      <!-- Font size -->
+      <select class="tb-select" onchange="execCmd('fontSize',this.value); this.blur()" title="حجم الخط">
+        <option value="2">صغير</option>
+        <option value="3" selected>عادي</option>
+        <option value="4">متوسط</option>
+        <option value="5">كبير</option>
+        <option value="6">أكبر</option>
+        <option value="7">ضخم</option>
+      </select>
+
+      <div class="tb-sep"></div>
+
+      <!-- Text format -->
+      <button class="tb-btn" onclick="execCmd('bold')" title="عريض (⌘B)"><b>ع</b></button>
+      <button class="tb-btn" onclick="execCmd('italic')" title="مائل (⌘I)"><i>ع</i></button>
+      <button class="tb-btn" onclick="execCmd('underline')" title="تحته خط (⌘U)"><u>ع</u></button>
+      <button class="tb-btn" onclick="execCmd('strikeThrough')" title="خط وسط"><s>ع</s></button>
+
+      <div class="tb-sep"></div>
+
+      <!-- Colors -->
+      <div class="tb-color-wrap" title="لون النص">
+        <button class="tb-color-btn">🖊</button>
+        <input class="tb-color-input" type="color" value="#0a84ff"
+          onchange="execCmd('foreColor', this.value)">
+      </div>
+      <div class="tb-color-wrap" title="تظليل">
+        <button class="tb-color-btn">🖍</button>
+        <input class="tb-color-input" type="color" value="#ffff00"
+          onchange="execCmd('hiliteColor', this.value)">
+      </div>
+
+      <div class="tb-sep"></div>
+
+      <!-- Alignment -->
+      <button class="tb-btn" onclick="execCmd('justifyRight')"  title="يمين">⇥</button>
+      <button class="tb-btn" onclick="execCmd('justifyCenter')" title="وسط">≡</button>
+      <button class="tb-btn" onclick="execCmd('justifyLeft')"   title="يسار">⇤</button>
+      <button class="tb-btn" onclick="execCmd('justifyFull')"   title="ضبط">⇔</button>
+
+      <div class="tb-sep"></div>
+
+      <!-- Lists -->
+      <button class="tb-btn" onclick="execCmd('insertUnorderedList')" title="قائمة نقطية">•≡</button>
+      <button class="tb-btn" onclick="execCmd('insertOrderedList')"   title="قائمة رقمية">1≡</button>
+      <button class="tb-btn" onclick="execCmd('outdent')" title="تقليل المسافة">←</button>
+      <button class="tb-btn" onclick="execCmd('indent')"  title="زيادة المسافة">→</button>
+
+      <div class="tb-sep"></div>
+
+      <!-- Undo / Redo -->
+      <button class="tb-btn" onclick="execCmd('undo')" title="تراجع (⌘Z)">↩</button>
+      <button class="tb-btn" onclick="execCmd('redo')" title="إعادة (⌘⇧Z)">↪</button>
+      <button class="tb-btn" onclick="execCmd('removeFormat')" title="مسح التنسيق" style="font-size:11px">مسح</button>
+    </div>
+
+    <div class="re-body">
+      <div class="re-page" id="rePage" contenteditable="true"
+        data-placeholder="اكتب محتوى المشهد هنا..."
+        dir="rtl"
+        onkeydown="handleEditorKey(event)"
+        oninput="updateWordCount()">
+      </div>
+    </div>
+
+    <div class="re-wordcount" id="reWordCount">0 كلمة</div>
+  </div>
+</div>
+
+<!-- ══ Script Editor Overlay ══ -->
+<div class="ce-overlay" id="ceOverlay" style="display:none">
+  <div class="ce-minimal-bar">
+    <button class="btn btn-glass btn-sm" onclick="closeContentEditor()" title="حفظ وإغلاق المحرر">✓ حفظ</button>
+    <span class="ce-proj-name" id="ceProjName" contenteditable="true"
+      data-placeholder="اكتب عنوان التصوير هنا" dir="rtl" spellcheck="false"
+      title="اضغط لتعديل اسم التصوير"
+      oninput="ceTitleInput()" onkeydown="ceTitleKey(event)" onblur="ceRenameProject()"></span>
+    <div id="ceSyncStatus" style="display:none" title="حالة المزامنة" onclick="_onSyncDotClick(this)">
+      <div class="sync-dot"></div>
+      <span id="ceSyncText">—</span>
+    </div>
+  </div>
+  <div class="ce-minimal-body">
+    <div style="position:relative;width:100%;max-width:660px;min-height:100%">
+      <div class="ce-writer-ph" id="ceWriterPh">اكتب # ثم مسافة لإضافة مقطع جديد، و ## ثم مسافة لإضافة مشهد جديد، ثم إنتر لكتابة محتوى المشهد</div>
+      <div class="ce-writer" id="ceWriterDiv"
+        contenteditable="true" dir="rtl" lang="ar" spellcheck="true"
+        role="textbox" aria-multiline="true" aria-label="محرر النص"
+        oninput="ceWriterOnInput()"
+        onkeydown="ceWriterKeydown(event)"
+        onpaste="ceWriterPaste(event)"></div>
+    </div>
+  </div>
+  <div class="ce-stats-bar">
+    <button class="ce-collapse-btn" id="ceCollapseAllBtn" onclick="ceToggleAllCollapse()" title="طي كل المقاطع أو فكها">↕ طي</button>
+    <span class="ce-stats-sep">·</span>
+    <span id="ceStatSegs">—</span>
+    <span class="ce-stats-sep">·</span>
+    <span id="ceStatShots">—</span>
+    <span class="ce-stats-sep">·</span>
+    <span id="ceStatWords">—</span>
+    <span class="ce-stats-sep">·</span>
+    <span id="ceStatDur">—</span>
+  </div>
+  <button id="ceLineMenuBtn" onclick="ceCollapseToggle()">▼</button>
+  <button id="ceMoveUpBtn" onclick="ceMoveHeading(-1)">↑</button>
+  <button id="ceMoveDownBtn" onclick="ceMoveHeading(1)">↓</button>
+</div>
+
+<!-- SheetJS for Excel import -->
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+
+<script type="module" src="./js/main.js"></script>
+
+<!-- Sony FX3 Bluetooth Control -->
+<script src="./js/sony-fx3.js"></script>
+
+<!-- Service Worker registration -->
+<script src="js/service-worker.js"></script>
+
+<!-- ═══════════════════ TELEPROMPTER CONTROL ═══════════════════ -->
+<div style="display:none" id="tpOverlay">
+</div>
+
+<!-- Columns dropdown — placed at body level to escape backdrop-filter stacking context (fixes mobile/Safari) -->
+<div class="sf-col-dropdown" id="sfColDropdown" onclick="event.stopPropagation()">
+  <label class="sf-col-item"><input type="checkbox" id="sfCol-title"     onchange="setColVis('title',this.checked)"    > المشهد</label>
+  <label class="sf-col-item"><input type="checkbox" id="sfCol-content"   onchange="setColVis('content',this.checked)"  > المحتوى</label>
+  <label class="sf-col-item"><input type="checkbox" id="sfCol-shooting"  onchange="setColVis('shooting',this.checked)" > التصوير</label>
+  <label class="sf-col-item"><input type="checkbox" id="sfCol-editMusic" onchange="setColVis('editMusic',this.checked)"> المونتاج</label>
+  <label class="sf-col-item"><input type="checkbox" id="sfCol-face"      onchange="setColVis('face',this.checked)"     > الوجه</label>
+  <label class="sf-col-item"><input type="checkbox" id="sfCol-files"     onchange="setColVis('files',this.checked)"    > الملفات</label>
+  <label class="sf-col-item"><input type="checkbox" id="sfCol-done"      onchange="setColVis('done',this.checked)"     > الإتمام</label>
+</div>
+
+<!-- View dropdown menu — placed at body level to escape backdrop-filter stacking context -->
+<div class="view-drop-menu" id="viewDropMenu" style="display:none">
+  <div class="vd-section-label">طريقة العرض</div>
+  <label class="vd-item"><input type="checkbox" id="vsFields"> معلومات المشهد</label>
+  <label class="vd-item"><input type="checkbox" id="vsTCNotes"> ⏱ الملاحظات الزمنية</label>
+</div>
+
+<!-- Custom confirm / prompt sheet — replaces browser confirm/alert/prompt -->
+<div id="_toastContainer" role="status" aria-live="polite" aria-atomic="false"></div>
+<div id="_sheetOverlay">
+  <div id="_sheet">
+    <p id="_sheetMsg"></p>
+    <input id="_sheetInput" type="text" placeholder="">
+    <div id="_sheetBtns">
+      <button id="_sheetCancelBtn">إلغاء</button>
+      <button id="_sheetConfirmBtn">تأكيد</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
