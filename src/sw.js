@@ -4,12 +4,12 @@ const STATIC_CACHE = 'musawwir-static-v14';
 
 // Static assets that rarely change — cache-first
 const STATIC_ASSETS = [
-  '/fonts/Salma-Light.otf',
-  '/fonts/Salma-Regular.otf',
-  '/fonts/Salma-Medium.otf',
-  '/fonts/Salma-Bold.otf',
-  '/icon-192.png',
-  '/icon-512.png',
+  '/src/assets/fonts/Salma-Light.otf',
+  '/src/assets/fonts/Salma-Regular.otf',
+  '/src/assets/fonts/Salma-Medium.otf',
+  '/src/assets/fonts/Salma-Bold.otf',
+  '/public/icon-192.png',
+  '/public/icon-512.png',
 ];
 
 // ── Install: cache static assets only ──
