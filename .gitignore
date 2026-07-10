@@ -1,6 +1,7 @@
-.firebase/
-backup/
-src/assets/fonts/*/*
+# Frontend
+frontend/.firebase/
+frontend/backup/
+frontend/src/assets/fonts/*/*
 
 # unrelated to project
 _*
