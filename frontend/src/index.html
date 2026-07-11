@@ -690,11 +690,11 @@
     id="ceSelectionIcon"
     class="ce-floating-btn"
     style="display:none;"
-    title="خيارات إضافية"
+    title="مساعد مِداد الذكي"
   >
     <img
       src="assets/images/midad_icon.jpg"
-      alt="مداد"
+      alt="مِداد"
       draggable="false"
     >
   </button>
@@ -709,14 +709,16 @@
     </button>
     <div class="ce-popup-content">
       <h2 class="ce-popup-title">
-          عنوان
+          مِداد - مساعدك في الالهام والابداع
       </h2>
-      <input
-        id="cePopupInput"
-        class="ce-popup-input"
-        type="text"
+      <p class="ce-popup-description">
+        ما هو محتوى المشهد? وإلخ مباشرة
+      </p>
+      <textarea
+        id="cePromptInput"
+        class="ce-prompt-input"
         placeholder="اكتب هنا..."
-      >
+        ></textarea>
       <div class="ce-popup-actions">
         <button
           class="btn btn-glass"
@@ -725,7 +727,7 @@
           إلغاء
         </button>
         
-        <button class="btn btn-filled" id="cePopupSubmit">
+        <button class="btn btn-filled" id="cePopupSubmit" onclick="submitPrompt()">
           ارسال
         </button>
 
