@@ -20,7 +20,8 @@ from typing import AsyncGenerator
 
 def _sse(data: str) -> str:
     """Format a string as a minimal SSE data event."""
-    return f"data: {data}\n\n"
+    lines = data.split("\n")
+    return "".join(f"data: {line}\n" for line in lines) + "\n"
 
 
 # ---------------------------------------------------------------------------
@@ -38,14 +39,24 @@ async def stream_write(prompt: str, language: str = "en") -> AsyncGenerator[str,
         async for chunk in llm.astream(messages):
             yield _sse(chunk.content)
     """
-    mock_response = (
-        f"[Mock Write - language: {language}]\n\n"
-        f'Generating content for prompt: "{prompt}"\n\n'
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
-        "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. "
-        "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris."
-    )
-
+    if language.lower().strip() == "ar":
+        mock_response = (
+            "هذي جملة منشوئة \n(المفروض) من الذكاء الاصطناعي "
+            "الكلام الي قاعد اكتبه مجرد استهبال فكر قبل ما تقرأ "
+            "ايش رايك بي طبقة الاوزون,\n الصراحة ما افضلها زي الكبسة "
+            "المفروض ما يكون فيه نصوص معمولة بالذكاء الاصطناعي حالياً "
+            "تسألني ليش؟\n\nاقلك مدري بس كذا, الزبدة, شكلي بنهي هنا "
+        )
+    else:
+        mock_response = (
+            f"[Mock Write - language: {language}]\n\n"
+            f'Generating content for prompt: "{prompt}"\n\n'
+            "Improved version: "
+            "1. This First Milk\n"
+            " 2. This Second Egg\n"
+            "3. This Third Wheat \n"
+        )
+    
     for word in mock_response.split(" "):
         yield _sse(word + " ")
         await asyncio.sleep(0.04)   # simulate token-by-token streaming
@@ -70,12 +81,11 @@ async def stream_improve(
     call when ready.
     """
     mock_response = (
-        f"[Mock Improve - language: {language}]\n\n"
-        f'Instruction: "{instruction}"\n\n'
+        f"[Mock Improve - language: {language}]\n"
+        f'Instruction: "{instruction}"\n'
         f"Original ({len(selected_text)} chars): {selected_text[:120]}{'...' if len(selected_text) > 120 else ''}\n\n"
         "Improved version: "
-        "This is a refined, polished version of the selected text. "
-        "It is clearer, more concise, and tailored to the requested style."
+        "jdakjdask jdjksa daksdj kasjd ask "
     )
 
     for word in mock_response.split(" "):
