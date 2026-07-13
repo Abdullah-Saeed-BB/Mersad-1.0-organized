@@ -303,7 +303,7 @@
 
 .ce-mention-item:hover,
 .ce-mention-item.active {
-    background: rgba(42, 63, 84, 0.8);
+    background: rgba(46, 68, 90, 0.8);
     color: var(--accent);
 }
 
@@ -386,4 +386,44 @@
         animation: none;
     }
 
+}
+
+/* ==========================================================
+   Midad text assist
+========================================================== */
+
+.ce-midad-text-assist {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+}
+
+.ce-midad-open-button {
+
+    background: none;
+    height: 28px;
+
+    pointer-events: all;
+    direction: rtl;
+    opacity: 0.8;
+
+    transition:  0.2s ease-out;
+}
+
+.ce-midad-open-button:hover {
+    cursor: pointer;
+    transform: scale(1.05);
+    transition: all 0.2s ease-in-out;
+    opacity: 1;
+} 
+
+.ce-midad-open-button img {
+    width: 28px;
+    height: 28px;
+    border-radius: 20%;
+    object-fit: cover;
+    pointer-events: none;
+    user-select: none;
 }

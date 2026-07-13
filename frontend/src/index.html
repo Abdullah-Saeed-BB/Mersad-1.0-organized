@@ -711,8 +711,8 @@
       <h2 class="ce-popup-title">
         مِداد - مساعدك في الالهام والابداع
       </h2>
-      <p class="ce-popup-description">
-        ما هو محتوى المشهد? وإلخ مباشرة
+      <p class="ce-popup-description" id="cePopupDescription">
+        معك مِداد, كيف يمكنني مساعدتك اليوم؟
       </p>
       
       <!-- <textarea
@@ -765,7 +765,16 @@
   </div>
   <div class="ce-minimal-body">
     <div style="position:relative;width:100%;max-width:660px;min-height:100%">
-      <div class="ce-writer-ph" id="ceWriterPh">اكتب # ثم مسافة لإضافة مقطع جديد، و ## ثم مسافة لإضافة مشهد جديد، ثم إنتر لكتابة محتوى المشهد</div>
+      <div class="ce-writer-ph" id="ceWriterPh">
+        اكتب # ثم مسافة لإضافة مقطع جديد، و ## ثم مسافة لإضافة مشهد جديد، ثم إنتر لكتابة محتوى المشهد
+        <br/>
+        <div class="ce-midad-text-assist">
+          <span>انقر على <span id="ceMidadCommandText">Ctrl + I</span> لتفعيل مساعدك الذكاء الاصطناعي مِداد.</span>
+          <div class="ce-midad-open-button" id="ceMidadOpenButton">
+            <img src="assets/images/midad_icon.jpg"/>            
+          </div>
+        </div>
+      </div>
       <div class="ce-writer" id="ceWriterDiv"
         contenteditable="true" dir="rtl" lang="ar" spellcheck="true"
         role="textbox" aria-multiline="true" aria-label="محرر النص"

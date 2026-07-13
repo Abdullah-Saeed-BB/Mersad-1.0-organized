@@ -6,6 +6,7 @@ let currentSelectionRange = null;
 document.addEventListener('DOMContentLoaded', () => {
   const writerDiv = document.getElementById('ceWriterDiv');
   const selectionIcon = document.getElementById('ceSelectionIcon');
+  const buttonIcon = document.getElementById('ceMidadOpenButton');
   let selectedTextSnapshot = ""; // Store chosen text globally to pass it to the popup
 
   // 1. Listen for user selections globally
@@ -55,13 +56,38 @@ document.addEventListener('DOMContentLoaded', () => {
     selectionIcon.style.display = 'none';
 
     selectedText = selectedTextSnapshot;
-    showTopPopup(selectedText);
+    showTopPopup('improve-part');
+  });
+
+  buttonIcon.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Clear the active cursor highlight selection gracefully
+    window.getSelection().removeAllRanges();
+
+    selectedText = selectedTextSnapshot;
+    showTopPopup('write-from-scratch');
   });
 });
 
 // 3. Popup Utilities
-async function showTopPopup(message) {
+// Types of popups: write-from-scratch, improve-part, add-new-part
+async function showTopPopup(type) {
   const popup = document.getElementById('ceTopPopup');
+  const description = document.getElementById('cePopupDescription');
+
+  if (description) {
+    let newDesc = "معك مِداد, "
+    if (type == 'improve-part') {
+      newDesc = newDesc + 'ما الذي تريد تحسينه في النص المحدد؟'
+    } else if (type == 'add-new-parts') {
+      newDesc = newDesc + 'ما هي المشاهد التي تريد اضافتها؟'
+    } else {
+      newDesc = newDesc + 'ما هو محتوى المشهد؟ وإلخ مباشرة'
+    }
+    description.innerText = `${newDesc}\nيمكنك الإشارة لي نصوص سابقة عن طريق كتابة علامة '@'`
+  }
 
   if (!popup) return;
 
@@ -370,6 +396,25 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target !== promptInput && !dropdown.contains(e.target)) hideDropdown();
   });
 });
+
+document.addEventListener('keydown', function(event) {
+  // Check if Ctrl (Windows) or Cmd (Mac) is pressed AND 'i' key is pressed
+  if ((event.ctrlKey || event.metaKey) && event.key === 'i') {
+    event.preventDefault(); // Prevent default browser behavior (like opening dev tools)
+    
+    const selStr = window.getSelection().toString().trim()
+    const placeholderDisplay = document.getElementById('ceWriterPh').style.display
+    if (selStr) {
+      showTopPopup("improve-part");
+    }
+    else if (placeholderDisplay === "none") {
+      showTopPopup("add-new-parts");
+    } else {
+      showTopPopup("write-from-scratch");
+    }
+  }
+});
+
 
 const submitButton = document.getElementById("cePromptSubmit");
 submitButton.addEventListener("click", async () => {
