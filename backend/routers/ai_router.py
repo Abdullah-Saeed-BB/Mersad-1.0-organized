@@ -10,8 +10,8 @@ import asyncio
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 
-from db.schemas import WriteRequest, ImproveRequest
-from agent.ai_agent import stream_write, stream_improve
+from db.schemas import WriteRequest
+from agent.ai_agent import stream_write
 
 router = APIRouter()
 
@@ -26,38 +26,12 @@ async def write(request: WriteRequest):
     Accepts a user prompt and streams back AI-generated text.
 
     - **prompt**: The writing instruction / topic.
-    - **language**: Target output language (ISO 639-1).
+    - **context**: The context where the prompt is asking for improvement or update.
+    - **selected_text**: The text the user wants to update.
+    - **references**: List of reference objects with title and script.
     """
     return StreamingResponse(
-        stream_write(prompt=request.prompt, language=request.language),
-        media_type="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache",
-            "X-Accel-Buffering": "no",
-        },
-    )
-
-
-# ---------------------------------------------------------------------------
-# /ai/improve
-# ---------------------------------------------------------------------------
-
-@router.post("/improve", summary="Improve selected text based on an instruction")
-async def improve(request: ImproveRequest):
-    """
-    Accepts selected text + an improvement instruction and streams back
-    the AI-improved version.
-
-    - **selected_text**: The text the user highlighted.
-    - **instruction**: What improvement the user wants applied.
-    - **language**: Target output language (ISO 639-1).
-    """
-    return StreamingResponse(
-        stream_improve(
-            selected_text=request.selected_text,
-            instruction=request.instruction,
-            language=request.language,
-        ),
+        stream_write(prompt=request.prompt, language='en'),
         media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache",

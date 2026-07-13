@@ -68,34 +68,3 @@ async def stream_write(prompt: str, language: str = "en") -> AsyncGenerator[str,
         await asyncio.sleep(0.04)   # simulate token-by-token streaming
 
     yield _sse("[DONE]")
-
-
-# ---------------------------------------------------------------------------
-# Improve generator
-# ---------------------------------------------------------------------------
-
-async def stream_improve(
-    selected_text: str,
-    instruction: str,
-    language: str = "en",
-) -> AsyncGenerator[str, None]:
-    """
-    Yield SSE-formatted chunks that simulate a streamed AI response
-    that improves the selected text according to the user's instruction.
-
-    Replace the mock lines below with a LangChain / LangGraph streaming
-    call when ready.
-    """
-    mock_response = (
-        f"[Mock Improve - language: {language}]\n"
-        f'Instruction: "{instruction}"\n'
-        f"Original ({len(selected_text)} chars): {selected_text[:120]}{'...' if len(selected_text) > 120 else ''}\n\n"
-        "Improved version: "
-        "jdakjdask jdjksa daksdj kasjd ask "
-    )
-
-    for word in mock_response.split(" "):
-        yield _sse(word + " ")
-        await asyncio.sleep(0.04)
-
-    yield _sse("[DONE]")

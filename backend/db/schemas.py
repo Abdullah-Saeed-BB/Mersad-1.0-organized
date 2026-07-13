@@ -3,11 +3,16 @@ Pydantic schemas for request/response validation.
 """
 
 from pydantic import BaseModel, Field
+from typing import Optional, List
 
 
 # ---------------------------------------------------------------------------
 # AI Write
 # ---------------------------------------------------------------------------
+
+class Reference(BaseModel):
+    title: str = Field(..., description="Reference title.")
+    script: str = Field(..., description="Reference script content.")
 
 class WriteRequest(BaseModel):
     """Payload for the /ai/write endpoint."""
@@ -19,35 +24,15 @@ class WriteRequest(BaseModel):
         description="The user's writing prompt.",
         examples=["Write a short paragraph about the importance of clean code."],
     )
-    language: str = Field(
-        default="en",
-        description="ISO 639-1 language code for the output.",
-        examples=["en", "ar"],
+    context: Optional[str] = Field(
+        None,
+        description="Context where the prompt is asking for improvement or update.",
     )
-
-
-# ---------------------------------------------------------------------------
-# AI Improve
-# ---------------------------------------------------------------------------
-
-class ImproveRequest(BaseModel):
-    """Payload for the /ai/improve endpoint."""
-
-    selected_text: str = Field(
-        ...,
-        min_length=1,
-        max_length=50_000,
-        description="The text the user has selected and wants to improve.",
+    selected_text: Optional[str] = Field(
+        None,
+        description="The text the user wants to update.",
     )
-    instruction: str = Field(
-        ...,
-        min_length=1,
-        max_length=5_000,
-        description="What the user wants done to the selected text (e.g. 'make it more formal').",
-        examples=["Make this paragraph shorter and more professional."],
-    )
-    language: str = Field(
-        default="en",
-        description="ISO 639-1 language code for the output.",
-        examples=["en", "ar"],
+    references: List[Reference] = Field(
+        default_factory=list,
+        description="List of reference objects with title and script.",
     )
