@@ -73,18 +73,3 @@ export async function getVideoScriptMarkdown() {
   // Return the final string, trimming any trailing whitespace/newlines
   return markdown.trim();
 }
-
-// export async function getSceneMarkdown(idOrTitle) {
-//   const allProjects = await getAllProjects();
-//   for (const project of allProjects) {
-//     if (!project.segments) continue;
-//     for (const seg of project.segments) {
-//       for (const shot of (seg.shots || [])) {
-//         if (shot.id === idOrTitle || shot.title === idOrTitle) {
-//           return shot.content || '';
-//         }
-//       }
-//     }
-//   }
-//   return null;
-// }

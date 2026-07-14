@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="./styles/global.css" />
   <link rel="stylesheet" href="./styles/ai-elements.css" />
   <link rel="stylesheet" href="./styles/index.css" />
+  <link rel="stylesheet" href="./styles/notification.css" />
 
   <!-- PWA -->
   <link rel="manifest" href="../manifest.json">
@@ -799,6 +800,9 @@
   <button id="ceMoveDownBtn" onclick="ceMoveHeading(1)">↓</button>
 </div>
 
+<!-- Notification Container -->
+<div id="notification-container" dir="rtl"></div>
+
 <!-- SheetJS for Excel import -->
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 
@@ -812,6 +816,9 @@
 
 <!-- AI Actions -->
 <script type="module" src="./js/ai-actions.js"></script>
+
+<!-- Notification -->
+<script type="module" src="./js/notification.js"></script>
 
 <!-- ═══════════════════ TELEPROMPTER CONTROL ═══════════════════ -->
 <div style="display:none" id="tpOverlay">

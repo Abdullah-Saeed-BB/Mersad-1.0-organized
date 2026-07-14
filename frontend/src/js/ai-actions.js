@@ -1,5 +1,6 @@
 import { ceUpdateStats, ceUpdateWriterPh, ceWriterSave, uid, getAllProjects, _allShots, _findSegForShot } from './main.js';
 import { getVideoScriptMarkdown, getProjectMarkdown, refreshProjects } from './get-scripts.js'
+import { notify } from './notification.js';
 
 let selectedText = null
 let currentSelectionRange = null;
@@ -162,24 +163,24 @@ async function submitPrompt() {
   const inputEl = document.getElementById('cePromptInput');
   
   if (!inputEl) {
-    alert("لا يوجد input")
+    notify("لا يوجد عنصر لكتابة الـ prompt فيه", "error")
     return
   };
 
   const [promptText, references] = await extarctPromptData(inputEl);
 
   if (!promptText) {
-    alert("لا يوجد prompt")
+    notify("لا يوجد prompt", "error")
     return
   };
 
   const writer = document.getElementById('ceWriterDiv');
-  if (!writer) return;
+  if (!writer) {
+    notify("لا يوجد عنصر لكتابة الـ script فيه", "error")
+    return
+  };
 
-  // 1. Clean the old selection coordinates
-  if (currentSelectionRange) {
-    currentSelectionRange.deleteContents();
-  }
+
   
   // Find or create a clean starting block-level div for streaming text inside the editor
   let activeLineDiv = null;
@@ -243,7 +244,13 @@ async function submitPrompt() {
       })
     });
 
+    // Clean the old selection coordinates
+    if (currentSelectionRange) {
+      currentSelectionRange.deleteContents();
+    }
+
     if (!response.ok || !response.body) {
+      notify("فشل الاتصال بالخادم", "error")
       throw new Error("Connection to Server Faild");
     }
 
@@ -322,6 +329,7 @@ async function submitPrompt() {
     closeTopPopup();
 
   } catch (error) {
+    notify(` [خطأ: ${error.message}] `, "error")
     console.error("Streaming error:", error);
     currentActiveTextNode.appendData(` [خطأ: ${error.message}] `);
   }

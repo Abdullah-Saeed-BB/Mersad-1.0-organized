@@ -1,0 +1,82 @@
+/* ==========================================================================
+   NOTIFICATION SYSTEM CSS
+   ========================================================================== */
+
+#notification-container {
+    position: fixed;
+
+    left: 50%;
+    bottom: 20px;
+
+    transform: translateX(-50%);
+
+    z-index: 9999;
+
+    display: flex;
+    flex-direction: column-reverse;
+
+    gap: 10px;
+
+    width: min(420px, calc(100vw - 32px));
+
+    pointer-events: none;
+}
+
+.notification {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    padding: 14px 18px;
+
+    background: var(--surface-2);
+    color: var(--text-1);
+
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+
+    box-shadow: 0 4px 28px rgba(0,0,0,.35);
+
+    font-family: var(--font-body);
+    font-size: 14px;
+    line-height: 1.55;
+    font-weight: 500;
+
+    pointer-events: auto;
+
+    opacity: 0;
+    transform: translateY(10px) scale(.98);
+
+    transition:
+        opacity .20s ease,
+        transform .20s ease,
+        background .18s ease,
+        border-color .18s ease;
+}
+
+.notification.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.notification.hide {
+    opacity: 0;
+    transform: translateY(10px) scale(.98);
+}
+
+/* Error Notification Theme */
+.notification.error {
+    background: rgba(255,69,58,.14);
+    border-color: rgba(255,69,58,.28);
+    color: var(--red);
+}
+
+/* Warning Notification Theme */
+.notification.warning {
+    background: rgba(255,159,10,.14);
+    border-color: rgba(255,159,10,.28);
+    color: var(--orange);
+}
