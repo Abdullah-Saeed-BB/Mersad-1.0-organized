@@ -137,15 +137,17 @@ async function extarctPromptData(promptElm) {
   for (const badge of badges) {
     const badgeId = badge.dataset.id
 
-    const markdown = await getProjectMarkdown(badgeId);
-
-    const ref = {
-      id: badgeId,
-      title: badge.dataset.name,
-      markdown: markdown,
-    };
-    references.push(ref)
-
+    if (!references.find((ref) => ref.id == badgeId)) { 
+      const markdown = await getProjectMarkdown(badgeId);
+      
+      const ref = {
+        id: badgeId,
+        title: badge.dataset.name,
+        markdown: markdown,
+      };
+      references.push(ref)
+    }
+      
     let badgeText = badge.textContent.trim();
 
     badgeText = badgeText.replace(/^📁\s*/, '');
