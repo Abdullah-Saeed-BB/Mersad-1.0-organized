@@ -11,7 +11,7 @@ from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 
 from db.schemas import WriteRequest
-from agent.ai_agent import stream_write
+from agent.ai_agent import call_agent
 
 router = APIRouter()
 
@@ -38,9 +38,15 @@ async def write(request: WriteRequest):
     print("references:\t", request.references)
     print("\n==================================\n\n")
 
+    response = call_agent(
+        prompt=request.prompt,
+        context=request.context,
+        selected_text=request.selected_text,
+        references=request.references,
+    )
     
     return StreamingResponse(
-        stream_write(prompt=request.prompt, language='en'),
+        response,
         media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache",

@@ -2,6 +2,6 @@
 agent package init — expose public streaming generators.
 """
 
-from .ai_agent import stream_write
+from .ai_agent import call_agent
 
-__all__ = ["stream_write"]
+__all__ = ["call_agent"]

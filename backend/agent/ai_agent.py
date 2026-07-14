@@ -1,70 +1,180 @@
-"""
-AI Agent — streaming generators for the write and improve features.
+from typing import TypedDict, Optional, List
+from langgraph.graph import StateGraph, START, END
+from langchain.chat_models import init_chat_model
+import os
 
-This module acts as the boundary between the routers and the LLM layer.
-Right now both generators produce simulated streaming output so the
-rest of the stack (router → StreamingResponse → SSE) can be wired up
-and tested without needing API keys.
+from dotenv import load_dotenv
+load_dotenv()
 
-Swap the body of each generator for real LangChain / LangGraph calls
-when you're ready to connect to an LLM.
-"""
+# ─────────────────────────────────────────────
+# 1. STATE DEFINITION
+# ─────────────────────────────────────────────
+class AgentState(TypedDict):
+    prompt: str                          # User input / request
+    context: Optional[str]               # Existing markdown script (optional)
+    selected_text: Optional[str]         # Selected portion to update (optional)
+    references: Optional[List[str]]      # Previous scripts as reference (optional)
+    system_prompt: str                   # Built system prompt fed to LLM
+    response: Optional[str]              # Final generated output
 
-import asyncio
-from typing import AsyncGenerator
+
+# ─────────────────────────────────────────────
+# 2. SYSTEM PROMPT BUILDER NODES
+# ─────────────────────────────────────────────
+BASE_FORMAT_RULES = """You are an expert video script writer.
+Output MUST be simple markdown following these rules:
+- Write the video title prefixed with a single `#`
+- Write every scene title prefixed with `##`
+- Keep the structure clean and easy to read."""
+
+def build_system_prompt_scratch(state: AgentState) -> dict:
+    """User wants a brand-new script from scratch."""
+    system_prompt = (
+        f"{BASE_FORMAT_RULES}\n\n"
+        "The user wants you to create a complete video script from scratch. "
+        "Plan the scenes, write the narration/dialogue, and keep the pacing engaging."
+    )
+    return {"system_prompt": system_prompt}
 
 
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
+def build_system_prompt_extend(state: AgentState) -> dict:
+    """User has a script and wants to add new content to it."""
+    system_prompt = (
+        f"{BASE_FORMAT_RULES}\n\n"
+        "The user has provided an existing video script and wants you to add "
+        "new scenes or content that fit naturally with what already exists.\n\n"
+        f"--- Existing script ---\n{state['context']}\n--- End of script ---"
+    )
+    return {"system_prompt": system_prompt}
+
+
+def build_system_prompt_update(state: AgentState) -> dict:
+    """User wants to update only a selected part of the script."""
+    system_prompt = (
+        f"{BASE_FORMAT_RULES}\n\n"
+        "The user wants you to rewrite / update only a specific selected part "
+        "of the script. Keep it consistent with the rest of the script.\n\n"
+        f"--- Full script context ---\n{state['context']}\n--- End of script ---\n\n"
+        f"--- Selected text to update ---\n{state['selected_text']}\n--- End of selection ---"
+    )
+    return {"system_prompt": system_prompt}
+
+
+# ─────────────────────────────────────────────
+# 3. REFERENCES NODE
+# ─────────────────────────────────────────────
+def add_references(state: AgentState) -> dict:
+    """Append references to the system prompt, or skip if none."""
+    references = state.get("references")
+    system_prompt = state["system_prompt"]
+
+    if references:
+        refs_block = "\n\n".join(
+            f"Reference #{i + 1}:\n{ref}" for i, ref in enumerate(references)
+        )
+        system_prompt += (
+            "\n\nUse the following previous scripts as a reference for style, "
+            "tone and structure:\n" + refs_block
+        )
+    return {"system_prompt": system_prompt}
+
+
+# ─────────────────────────────────────────────
+# 4. LLM CALL NODE
+# ─────────────────────────────────────────────
+def call_llm(state: AgentState) -> dict:
+    """Feed system_prompt + user prompt to the LLM and return the response."""
+    llm = init_chat_model(
+        model="gemini-3.1-flash-lite",
+        model_provider="google_genai",
+        api_key=os.getenv("GEMINI_API_KEY")
+    )
+
+    messages = [
+        {"role": "system", "content": state["system_prompt"]},
+        {"role": "user", "content": state["prompt"]},
+    ]
+    try:
+        response = llm.invoke(messages)
+        content = response.content[0]["text"]
+        return {"response": content}
+    except Exception as e:
+        print("\tError occurs while calling LLM:", e)
+        return {"response": f"Error: {str(e)}"}
+
+
+# ─────────────────────────────────────────────
+# 5. ROUTER (decides which prompt-builder to use)
+# ─────────────────────────────────────────────
+def route_by_context(state: AgentState) -> str:
+    has_context = bool(state.get("context"))
+    has_selected = bool(state.get("selected_text"))
+
+    if not has_context and not has_selected:
+        return "scratch"
+    if has_context and not has_selected:
+        return "extend"
+    if has_context and has_selected:
+        return "update"
+    return "scratch"
+
+
+# ─────────────────────────────────────────────
+# 6. GRAPH ASSEMBLY
+# ─────────────────────────────────────────────
+def build_graph():
+    graph = StateGraph(AgentState)
+
+    # Register nodes
+    graph.add_node("scratch", build_system_prompt_scratch)
+    graph.add_node("extend", build_system_prompt_extend)
+    graph.add_node("update", build_system_prompt_update)
+    graph.add_node("references", add_references)
+    graph.add_node("call_llm", call_llm)
+
+    # START → one of the 3 prompt builders (conditional)
+    graph.add_conditional_edges(
+        START,
+        route_by_context,
+        {
+            "scratch": "scratch",
+            "extend": "extend",
+            "update": "update",
+        },
+    )
+
+    # All 3 builders converge → references → call_llm → END
+    graph.add_edge("scratch", "references")
+    graph.add_edge("extend", "references")
+    graph.add_edge("update", "references")
+    graph.add_edge("references", "call_llm")
+    graph.add_edge("call_llm", END)
+
+    return graph.compile()
+
+agent = build_graph()
 
 def _sse(data: str) -> str:
     """Format a string as a minimal SSE data event."""
     lines = data.split("\n")
-    return "".join(f"data: {line}\n" for line in lines) + "\n"
+    return "".join(f"data: {line}\n" for line in lines) + "\n"    
 
+def call_agent(prompt: str,
+               context: Optional[str] = None,
+               selected_text: Optional[str] = None,
+               references: Optional[List[str]] = None) -> dict:
 
-# ---------------------------------------------------------------------------
-# Write generator
-# ---------------------------------------------------------------------------
+    state = {
+        "prompt": prompt,
+        "context": context,
+        "selected_text": selected_text,
+        "references": references,
+        "system_prompt": "",
+        "response": None,
+    }
 
-async def stream_write(prompt: str, language: str = "en") -> AsyncGenerator[str, None]:
-    """
-    Yield SSE-formatted chunks that simulate a streamed AI response
-    to a user writing prompt.
+    result = agent.invoke(state)
 
-    Replace the mock lines below with a LangChain / LangGraph streaming
-    call, e.g.:
-
-        async for chunk in llm.astream(messages):
-            yield _sse(chunk.content)
-    """
-    if language.lower().strip() == "ar":
-        mock_response = (
-            "هذي جملة منشوئة \n(المفروض) من الذكاء الاصطناعي "
-            "الكلام الي قاعد اكتبه مجرد استهبال فكر قبل ما تقرأ "
-            "ايش رايك بي طبقة الاوزون,\n الصراحة ما افضلها زي الكبسة "
-            "المفروض ما يكون فيه نصوص معمولة بالذكاء الاصطناعي حالياً "
-            "تسألني ليش؟\n\nاقلك مدري بس كذا, الزبدة, شكلي بنهي هنا\n "
-            "# المقطع الأول\n"
-            "## المشهد الأول | في له عدة شخصيات\n"
-            "محتوى المشهد الي في له عدة شخصيات"
-        )
-    else:
-        mock_response = (
-            f"[Mock Write - language: {language}]\n\n"
-            f'Generating content for prompt: "{prompt}"\n\n'
-            "# Improved version:\n"
-            "## This First\n"
-            "Milk\n"
-            "## This Second\n"
-            "Egg\n"
-            "## This Third\n"
-            "Wheat\n"
-        )
-    
-    for word in mock_response.split(" "):
+    for word in result["response"].split(" "):
         yield _sse(word + " ")
-        await asyncio.sleep(0.04)   # simulate token-by-token streaming
-
     yield _sse("[DONE]")
