@@ -1,6 +1,7 @@
 from typing import TypedDict, Optional, List
 from langgraph.graph import StateGraph, START, END
 from langchain.chat_models import init_chat_model
+import time
 import os
 
 from dotenv import load_dotenv
@@ -191,4 +192,5 @@ def call_agent(prompt: str,
 
     for word in result["response"].split(" "):
         yield _sse(word + " ")
+        time.sleep(0.02)
     yield _sse("[DONE]")

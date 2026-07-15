@@ -46,7 +46,7 @@ async def write(request: WriteRequest):
         selected_text=request.selected_text,
         references=request.references,
     )
-    
+
     return StreamingResponse(
         response,
         media_type="text/event-stream",

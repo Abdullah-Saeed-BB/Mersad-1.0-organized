@@ -401,23 +401,28 @@ async function submitPrompt() {
       })
     });
 
-    hidePopupBg();
-    hideAnimation();
-
+    
     if (!response.ok || !response.body) {
+      hidePopupBg();
+      hideAnimation();
       notify("فشل الاتصال بالخادم", "error")
       throw new Error("Connection to Server Faild");
     }
-
-    console.log("selectedText", selectedText)
-    console.log("currentSelectionRange", currentSelectionRange)
-
+    
     const reader = response.body.getReader();
     const decoder = new TextDecoder("utf-8");
     let buffer = "";
+    let animationHidden = false;
 
     while (true) {
       const { value, done } = await reader.read();
+      
+      if (!animationHidden) {
+        hidePopupBg();
+        hideAnimation();
+        animationHidden = true;
+      }
+
       if (done) break;
 
       buffer += decoder.decode(value, { stream: true });

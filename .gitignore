@@ -7,5 +7,9 @@ frontend/src/assets/fonts/*/*
 backend/backend/__pycache__/
 backend/.env
 
+# IDE AI Agent
+skills-lock.json
+.agents
+
 # unrelated to project
 _*/
