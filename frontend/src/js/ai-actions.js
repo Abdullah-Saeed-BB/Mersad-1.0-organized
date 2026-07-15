@@ -1,6 +1,7 @@
 import { ceUpdateStats, ceUpdateWriterPh, ceWriterSave, uid, getAllProjects, _allShots, _findSegForShot } from './main.js';
 import { getVideoScriptMarkdown, getProjectMarkdown, refreshProjects } from './get-scripts.js'
 import { notify } from './notification.js';
+import { showAnimation, hideAnimation } from './icon_animation.js';
 
 let selectedText = null
 let currentSelectionRange = null;
@@ -80,6 +81,9 @@ document.addEventListener('DOMContentLoaded', () => {
 async function showTopPopup(type) {
   await refreshProjects();
 
+  const popupBg = document.getElementById("ceTopPopupBg");
+  popupBg.style.display = "block";
+
   currentAIActionType = type
 
   if (type === 'add-new-part') {
@@ -92,6 +96,15 @@ async function showTopPopup(type) {
 
   const popup = document.getElementById('ceTopPopup');
   const description = document.getElementById('cePopupDescription');
+  const promptInput = document.getElementById('cePromptInput');
+
+  if (promptInput) {
+    setTimeout(() => {
+      promptInput.focus();
+    }, 100);
+  } else {
+    notify("التطبيق لم يتعرف على مربع الكتابة", "warning");
+  }
 
   if (description) {
     let newDesc = "معك مِداد, "
@@ -114,10 +127,18 @@ async function showTopPopup(type) {
   });
 }
 
-export function closeTopPopup() {
-  const popup = document.getElementById('ceTopPopup');
-  if (!popup) return;
+function hidePopupBg() {
+  const popupBg = document.getElementById("ceTopPopupBg");
+  popupBg.style.display = "none";
+}
 
+export function closeTopPopup(shouldHidePopupBg=true) {
+  const popup = document.getElementById('ceTopPopup');
+  
+  if (!popup) return;
+  
+  if (shouldHidePopupBg) hidePopupBg();
+  
   popup.classList.remove('show');
   
   // Wait out the CSS layout opacity transition before setting visibility to none
@@ -251,6 +272,11 @@ function buildContextWithCursorMarker(writerDiv, savedRange) {
 async function submitPrompt() {
   const inputEl = document.getElementById('cePromptInput');
   
+  const editor = document.getElementById('ceWriterDiv');
+  editor.contentEditable = false
+
+  showAnimation();
+  
   if (!inputEl) {
     notify("لا يوجد عنصر لكتابة الـ prompt فيه", "error")
     return
@@ -273,7 +299,10 @@ async function submitPrompt() {
   if (!savedRange) {
     const selection = window.getSelection();
     if (selection && selection.rangeCount > 0) {
-      savedRange = selection.getRangeAt(0);
+      const range = selection.getRangeAt(0);
+      if (writer.contains(range.startContainer)) {
+        savedRange = range;
+      }
     }
   }
 
@@ -291,12 +320,19 @@ async function submitPrompt() {
       console.warn("Marker not found in preBuiltContext: Cursor div matching failed.");
     }
   }
+
+  const editorSnapshot = writer.innerHTML;
+  
+  if (currentSelectionRange) {
+    currentSelectionRange.deleteContents();
+    currentSelectionRange = null;
+  }
   
   // Find or create a clean starting block-level div for streaming text inside the editor
   let activeLineDiv = null;
 
   if (savedRange) {
-    activeLineDiv = savedRange.anchorNode;
+    activeLineDiv = savedRange.startContainer;
     while (activeLineDiv && activeLineDiv.parentElement !== writer) {
       activeLineDiv = activeLineDiv.parentElement;
     }
@@ -317,7 +353,6 @@ async function submitPrompt() {
   
   // Clear saved range after use to prevent stale state
   savedRange = null;
-  currentSelectionRange = null;
 
   // Track text updates smoothly
   let currentActiveTextNode = document.createTextNode("");
@@ -343,7 +378,7 @@ async function submitPrompt() {
     }
   }
 
-  closeTopPopup()
+  closeTopPopup(false)
 
   try {
     let context = null;
@@ -366,15 +401,16 @@ async function submitPrompt() {
       })
     });
 
-    // Clean the old selection coordinates
-    if (currentSelectionRange) {
-      currentSelectionRange.deleteContents();
-    }
+    hidePopupBg();
+    hideAnimation();
 
     if (!response.ok || !response.body) {
       notify("فشل الاتصال بالخادم", "error")
       throw new Error("Connection to Server Faild");
     }
+
+    console.log("selectedText", selectedText)
+    console.log("currentSelectionRange", currentSelectionRange)
 
     const reader = response.body.getReader();
     const decoder = new TextDecoder("utf-8");
@@ -409,6 +445,7 @@ async function submitPrompt() {
         let rawChunk = dataBuffer.join('\n');
 
         if (rawChunk.trim() === "[DONE]") {
+          editor.contentEditable = true;
           break;
         }
 
@@ -451,9 +488,12 @@ async function submitPrompt() {
     closeTopPopup();
 
   } catch (error) {
+    editor.contentEditable = true;
+    hidePopupBg();
+    hideAnimation();
     notify(` [خطأ: ${error.message}] `, "error")
     console.error("Streaming error:", error);
-    currentActiveTextNode.appendData(` [خطأ: ${error.message}] `);
+    writer.innerHTML = editorSnapshot;
   }
 }
 
@@ -597,6 +637,7 @@ document.addEventListener('keydown', function(event) {
     const selStr = window.getSelection().toString().trim()
     const placeholderDisplay = document.getElementById('ceWriterPh').style.display
     if (selStr) {
+      selectedText = selStr.toString().trim()
       showTopPopup("improve-part");
     }
     else if (placeholderDisplay === "none") {

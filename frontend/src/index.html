@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="./styles/ai-elements.css" />
   <link rel="stylesheet" href="./styles/index.css" />
   <link rel="stylesheet" href="./styles/notification.css" />
+  <link rel="stylesheet" href="./styles/icon_animation.css" />
 
   <!-- PWA -->
   <link rel="manifest" href="../manifest.json">
@@ -686,6 +687,55 @@
 
 <!-- ══ Script Editor Overlay ══ -->
 <div class="ce-overlay" id="ceOverlay" style="display:none">
+  <div class="ce-minimal-bar">
+    <button class="btn btn-glass btn-sm" onclick="closeContentEditor()" title="حفظ وإغلاق المحرر">✓ حفظ</button>
+    <span class="ce-proj-name" id="ceProjName" contenteditable="true"
+      data-placeholder="اكتب عنوان التصوير هنا" dir="rtl" spellcheck="false"
+      title="اضغط لتعديل اسم التصوير"
+      oninput="ceTitleInput()" onkeydown="ceTitleKey(event)" onblur="ceRenameProject()"></span>
+    <div id="ceSyncStatus" style="display:none" title="حالة المزامنة" onclick="_onSyncDotClick(this)">
+      <div class="sync-dot"></div>
+      <span id="ceSyncText">—</span>
+    </div>
+  </div>
+  <div class="ce-minimal-body">
+    <div style="position:relative;width:100%;max-width:660px;min-height:100%">
+      <div class="ce-writer-ph" id="ceWriterPh">
+        اكتب # ثم مسافة لإضافة مقطع جديد، و ## ثم مسافة لإضافة مشهد جديد، ثم إنتر لكتابة محتوى المشهد
+        <br/>
+        <div class="ce-midad-text-assist">
+          <span>انقر على <span id="ceMidadCommandText">Ctrl + I</span> لتفعيل مساعدك الذكاء الاصطناعي مِداد.</span>
+          <div class="ce-midad-open-button" id="ceMidadOpenButton">
+            <img src="assets/images/midad_icon.jpg"/>            
+          </div>
+        </div>
+      </div>
+      <div class="ce-writer" id="ceWriterDiv"
+        contenteditable="true" dir="rtl" lang="ar" spellcheck="true"
+        role="textbox" aria-multiline="true" aria-label="محرر النص"
+        oninput="ceWriterOnInput()"
+        onkeydown="ceWriterKeydown(event)"
+        onpaste="ceWriterPaste(event)"></div>
+    </div>
+  </div>
+  <div class="ce-stats-bar">
+    <button class="ce-collapse-btn" id="ceCollapseAllBtn" onclick="ceToggleAllCollapse()" title="طي كل المقاطع أو فكها">↕ طي</button>
+    <span class="ce-stats-sep">·</span>
+    <span id="ceStatSegs">—</span>
+    <span class="ce-stats-sep">·</span>
+    <span id="ceStatShots">—</span>
+    <span class="ce-stats-sep">·</span>
+    <span id="ceStatWords">—</span>
+    <span class="ce-stats-sep">·</span>
+    <span id="ceStatDur">—</span>
+  </div>
+  <button id="ceLineMenuBtn" onclick="ceCollapseToggle()">▼</button>
+  <button id="ceMoveUpBtn" onclick="ceMoveHeading(-1)">↑</button>
+  <button id="ceMoveDownBtn" onclick="ceMoveHeading(1)">↓</button>
+
+  <!-- Popup hidden background -->
+  <div class="ce-modal-backdrop" id="ceTopPopupBg" style="display: none;"></div>
+
   <!-- Prompt Popup -->
   <button
     id="ceSelectionIcon"
@@ -752,52 +802,14 @@
     </div>
   </div>
 
+  <!-- Animation Icon -->
+  <div class="hide" id="animation-container">
+    <div class="wave-ring"></div>
+    <!-- <div class="wave-ring"></div>
+    <div class="wave-ring"></div> -->
+    <img id="animation-frame" src="" alt="Animated Icon">
+  </div>
 
-  <div class="ce-minimal-bar">
-    <button class="btn btn-glass btn-sm" onclick="closeContentEditor()" title="حفظ وإغلاق المحرر">✓ حفظ</button>
-    <span class="ce-proj-name" id="ceProjName" contenteditable="true"
-      data-placeholder="اكتب عنوان التصوير هنا" dir="rtl" spellcheck="false"
-      title="اضغط لتعديل اسم التصوير"
-      oninput="ceTitleInput()" onkeydown="ceTitleKey(event)" onblur="ceRenameProject()"></span>
-    <div id="ceSyncStatus" style="display:none" title="حالة المزامنة" onclick="_onSyncDotClick(this)">
-      <div class="sync-dot"></div>
-      <span id="ceSyncText">—</span>
-    </div>
-  </div>
-  <div class="ce-minimal-body">
-    <div style="position:relative;width:100%;max-width:660px;min-height:100%">
-      <div class="ce-writer-ph" id="ceWriterPh">
-        اكتب # ثم مسافة لإضافة مقطع جديد، و ## ثم مسافة لإضافة مشهد جديد، ثم إنتر لكتابة محتوى المشهد
-        <br/>
-        <div class="ce-midad-text-assist">
-          <span>انقر على <span id="ceMidadCommandText">Ctrl + I</span> لتفعيل مساعدك الذكاء الاصطناعي مِداد.</span>
-          <div class="ce-midad-open-button" id="ceMidadOpenButton">
-            <img src="assets/images/midad_icon.jpg"/>            
-          </div>
-        </div>
-      </div>
-      <div class="ce-writer" id="ceWriterDiv"
-        contenteditable="true" dir="rtl" lang="ar" spellcheck="true"
-        role="textbox" aria-multiline="true" aria-label="محرر النص"
-        oninput="ceWriterOnInput()"
-        onkeydown="ceWriterKeydown(event)"
-        onpaste="ceWriterPaste(event)"></div>
-    </div>
-  </div>
-  <div class="ce-stats-bar">
-    <button class="ce-collapse-btn" id="ceCollapseAllBtn" onclick="ceToggleAllCollapse()" title="طي كل المقاطع أو فكها">↕ طي</button>
-    <span class="ce-stats-sep">·</span>
-    <span id="ceStatSegs">—</span>
-    <span class="ce-stats-sep">·</span>
-    <span id="ceStatShots">—</span>
-    <span class="ce-stats-sep">·</span>
-    <span id="ceStatWords">—</span>
-    <span class="ce-stats-sep">·</span>
-    <span id="ceStatDur">—</span>
-  </div>
-  <button id="ceLineMenuBtn" onclick="ceCollapseToggle()">▼</button>
-  <button id="ceMoveUpBtn" onclick="ceMoveHeading(-1)">↑</button>
-  <button id="ceMoveDownBtn" onclick="ceMoveHeading(1)">↓</button>
 </div>
 
 <!-- Notification Container -->
@@ -819,6 +831,9 @@
 
 <!-- Notification -->
 <script type="module" src="./js/notification.js"></script>
+
+<!-- Animated Icon -->
+<script type="module" src="./js/icon_animation.js"></script>
 
 <!-- ═══════════════════ TELEPROMPTER CONTROL ═══════════════════ -->
 <div style="display:none" id="tpOverlay">
