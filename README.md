@@ -1,7 +1,7 @@
 <img width="3840" height="552" alt="banner" src="https://github.com/user-attachments/assets/4419015c-e670-4ce3-a246-4ed81b6d32eb" />
 
 <h1 align="center">مِداد</h1>
-<h3 align="center">هو مساعد ذكاء اصطناعي صمم لمساعدة المصورين والكُتاب في كتابة محتوى, وهو اضافة في مِرصاد وهو تطبيق لتنظيم وإدارة عمليات التصوير و كتابة المحتوى.</h3>
+<h3 align="center">هو مساعد ذكاء اصطناعي صمم لمساعدة المصورين والكُتاب في كتابة محتوى, وهو اضافة في مِرصاد وهو تطبيق لتنظيم وإدارة عمليات التصوير.</h3>
 <h3 align="center">تم استعمال نموذج <code>Gemini 3.1 Flash-Lite</code> كعقل لي مِداد.</h3>
 
 
@@ -42,8 +42,9 @@
 	 - تم إضافة مجلد `images/` الذي يحتوي على شعار مِداد, و إضافة مجلد `icon_frames/` الذي يحتوي على إطارات لانميشن الانتظار.
 
 ### الخادم (Backend)
-تم استعمال لغة بايثون وإطار عمل FastAPI لبناء الخادم
+تم استعمال لغة بايثون لبناء الخادم: 
 ```
+backend/
 ├── main.py # نقطة الدخول لتطبيق FastAPI. ابدأ تشغيل الخادم من هنا.
 ├── dependencies.py # الاعتماديات المشتركة. حقن جلسات قاعدة البيانات والإعدادات.
 ├── data/
@@ -56,3 +57,11 @@
 └── agent/ # المنطق الأساسي لوكيل الذكاء الاصطناعي.
     └── ai_agent.py # الكود الرئيسي لعمليات وكيل الذكاء الاصطناعي.
 ```
+**الأدوات المستعملة لبناء الخادم:**
+
+<div align="right">
+<img src="https://img.shields.io/badge/Python-Programming%20Languge-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
+<img src="https://img.shields.io/badge/FastAPI-Backend-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI">
+<img src="https://img.shields.io/badge/LangGraph-AI%20Agent-0F172A?style=for-the-badge&logo=langchain&logoColor=white" alt="LangGraph">
+</div>
+
