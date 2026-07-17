@@ -60,63 +60,69 @@
 <img src="https://img.shields.io/badge/LangGraph-AI%20Agent-0F172A?style=for-the-badge&logo=langchain&logoColor=white" alt="LangGraph">
 </div>
 
+## التثبيت و التشغيل
+> قد تكون عملية التثبيت المشروع معقدة لدى البعض, فإذا واجهتكم اي مشكلة لا تتردو بالتواصل معي عبر حساباتي في [لينكدإن](https://www.linkedin.com/in/abdullahsaeed-dev/) او [أكس](https://x.com/Abdullah_SBB) (تويتر سابقاً).
 
+يتكون المشروع من جزأين يجب تشغيلهما في الوقت نفسه:
+- **الواجهة الأمامية (Frontend)** – وهي الجزء الذي تراه وتتفاعل معه (مبني باستخدام HTML وCSS وJavaScript).
+- **الواجهة الخلفية (Backend)** – وهي الجزء الذي يشغّل المساعد الذكي **مداد** (مبني باستخدام Python).
+### 1. تثبيت الأدوات المطلوبة
+قبل البدء، قم بتثبيت البرنامجين التاليين:
+1. **لغة بايثون** – قم [بتنزيل بايثون](https://www.python.org/downloads/) واختر أحدث اصدار (أثناء التثبيت تأكد من تفعيل خيار **"Add Python to PATH"**).
+2. مكتبة **uv** – وهي الأداة المستخدمة لإدارة الواجهة الخلفية, افتح الطرفية (في نظام ويندوز: ابحث عن **Command Prompt**, وفي نظام ماك: ابحث عن **Terminal**) ثم نفذ الأمر التالي:
 
-## Getting Started
-The project has two parts that both need to be running at the same time:
-- **Frontend** – the part you see and click on (built with HTML, CSS, and JavaScript)
-- **Backend** – the part that powers the AI assistant, Midād (built with Python)
-### 1. Install the required tools
-Before you start, install these two programs:
-1. **Python** – [Download Python here](https://www.python.org/downloads/) (choose the latest version, and during installation, make sure to check the box that says "Add Python to PATH").
-2. **uv** – this is the tool used to manage the backend. Open a terminal (on Windows: search for "Command Prompt" or "PowerShell"; on Mac: search for "Terminal") and run:
-
-```
+```bash
 pip install uv
 ```
 
-You'll also need a code editor to open the project folder. We recommend **[Visual Studio Code](https://code.visualstudio.com/)** — it's free and beginner-friendly (If you expert use any IDE you prefer). 
-### 2. Download the project
+ستحتاج أيضًا إلى محرر أكواد لفتح مجلد المشروع. نوصي باستخدام [Visual Studio Code](https://code.visualstudio.com/)، فهو مجاني وسهل الاستخدام للمبتدئين.
+### 2. تنزيل المشروع
+1. اضغط على الزر الأخضر **"Code"** في أعلى صفحة GitHub الخاصة بالمشروع، ثم اختر **"Download ZIP"**.
+2. فك ضغط الملف (Extract/Unzip) في مكان يسهل الوصول إليه، مثل سطح المكتب.
+3. افتح مجلد المشروع باستخدام Visual Studio Code.
+### 3. إعداد وتشغيل الواجهة الخلفية (Backend)
+1. في Visual Studio Code، افتح طرفية جديدة من القائمة: **Terminal → New Terminal**.
+2. انتقل إلى مجلد الواجهة الخلفية:
 
-1. Click the green **"Code"** button on this GitHub page and choose **"Download ZIP"**.
-2. Extract (unzip) the folder somewhere easy to find, like your Desktop.
-3. Open that folder in Visual Studio Code.
-
-### 3. Set up and run the backend
-1. In Visual Studio Code, open a new terminal (menu: **Terminal → New Terminal**).
-2. Navigate into the backend folder:
-
-```
+```bash
 cd backend
 ```
 
-3. Install all the required Python packages automatically with:
+3. ثبّت جميع حزم Python المطلوبة تلقائيًا باستخدام:
 
-```
+```bash
 uv sync
 ```
 
-4. Create a file named `.env` inside the `backend` folder, and add your AI API key like this:
+4. أنشئ ملفًا باسم `.env` داخل مجلد `backend` ، ثم أضف مفتاح واجهة برمجة التطبيقات (API Key) الخاص بالذكاء الاصطناعي Gemini, بالشكل التالي:
 
-```
+```env
 GEMINI_API_KEY=your-api-key-here
 ```
-*(You can get a free Gemini API key from [Google AI Studio](https://aistudio.google.com/).)*
 
-5. Start the backend server:
+_(يمكنك الحصول على مفتاح Gemini API مجاني من [Google AI Studio](https://aistudio.google.com/.))_
 
-```
+5. شغّل الخادم عن طريق الأمر التالي:
+
+```bash
 uv run uvicorn main:app
 ```
-If everything worked, you'll see a message saying the server is running (`INFO:     Started server process`) — leave this terminal window open.
 
-### 4. Run the frontend (what you'll see in your browser)
-1. Install "Live Server" extension (If not installed), from the Extensions panel on the lift side.
-2. Open `/frontend/src` folder, and you will found `index.html` file, right-click the file in Visual Sudio Code and choose **"Open with Live Server"**.  
-3. Your browser will open automatically and show the Mersad app.
+إذا تم كل شيء بنجاح، فستظهر رسالة تفيد بأن الخادم يعمل، مثل:
 
-### 5. You're ready to go!
+```text
+INFO:     Started server process [رقم_عشوائي]
+```
 
-With both the backend and frontend running, you can now use Mersad and the Midād AI assistant in your browser. If you ever want to stop the app, just close both terminal windows.
+اترك نافذة الطرفية هذه مفتوحة.
+### 4. تشغيل الواجهة الأمامية (Frontend)
+1. ثبّت إضافة **Live Server** إذا لم تكن مثبتة، وذلك من لوحة **Extensions** الموجودة في الجانب الأيسر من Visual Studio Code.
+2. افتح المجلد `/frontend/src`، ثم ابحث عن الملف `index.html`. انقر بزر الفأرة الأيمن على الملف داخل Visual Studio Code، ثم اختر **"Open with Live Server"**.
+3. سيفتح المتصفح تلقائيًا، وستظهر لك واجهة تطبيق **مرصاد**.
 
-> **Note:** Every time you want to use Mersad again, repeat step 3 and step 4 (starting both the backend and frontend) — you won't need to reinstall anything again.
+### 5. أصبح كل شيء جاهزًا!
+بعد تشغيل كلٍ من الواجهة الخلفية والواجهة الأمامية، يمكنك الآن استخدام **مرصاد** والمساعد الذكي **مداد** مباشرةً من خلال المتصفح.
+
+وعندما تنتهي من استخدام التطبيق، يكفي إغلاق نافذة الطرفية الخاصة بالواجهة الخلفية وإيقاف **Live Server**.
+
+> **ملاحظة:** في كل مرة ترغب فيها باستخدام مرصاد مرة أخرى، كرر الخطوتين **3** و**4** فقط (تشغيل الواجهة الخلفية والواجهة الأمامية). لن تحتاج إلى إعادة تثبيت أي من الأدوات أو الحزم مرة أخرى.
