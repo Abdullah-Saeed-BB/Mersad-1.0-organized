@@ -11,5 +11,5 @@ backend/.env
 skills-lock.json
 .agents
 
-# unrelated to project
+# unrelated to the project
 _*/
