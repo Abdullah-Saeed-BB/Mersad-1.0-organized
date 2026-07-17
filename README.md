@@ -112,7 +112,7 @@ If everything worked, you'll see a message saying the server is running (`INFO: 
 
 ### 4. Run the frontend (what you'll see in your browser)
 1. Install "Live Server" extension (If not installed), from the Extensions panel on the lift side.
-2. Open `/frontend/src` folder, and you will found `index.html` file, right-click the file in Visual Sudio Code and choose **""**.  
+2. Open `/frontend/src` folder, and you will found `index.html` file, right-click the file in Visual Sudio Code and choose **"Open with Live Server"**.  
 3. Your browser will open automatically and show the Mersad app.
 
 ### 5. You're ready to go!
