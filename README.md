@@ -1,4 +1,7 @@
 <img width="3840" height="552" alt="banner" src="https://github.com/user-attachments/assets/4419015c-e670-4ce3-a246-4ed81b6d32eb" />
+<div align="center">
+<a href="https://github.com/Abdullah-Saeed-BB/mersad-with-midad/blob/main/README_en.md">English</a> | <span><i>عربي</i></span>
+</div>
 
 <h1 align="center">مِداد</h1>
 <h3 align="center">هو مساعد ذكاء اصطناعي صمم لمساعدة المصورين والكُتاب في كتابة محتوى, وهو اضافة في مِرصاد وهو تطبيق لتنظيم وإدارة عمليات التصوير.</h3>
