@@ -5,7 +5,7 @@
 
 <h1 align="center">Midad</h1>
 <h3 align="center">An AI assistant designed to help photographers and writers create content. It is integrated into Mirsad, a platform for organizing and managing photography workflows.</h3>
-<h3 align="center">Powered by the <code>Gemini 3.1 Flash-Lite</code> model.</h3>
+<h3 align="center">Powered by the <b>Gemini</b> models.</h3>
 
 <h2 align="center">Midad Features</h2>
 
