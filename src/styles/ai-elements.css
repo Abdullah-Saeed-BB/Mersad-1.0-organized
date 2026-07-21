@@ -237,6 +237,12 @@
 
 .ce-popup-actions {
     display: flex;
+    justify-content: space-between;
+    /* gap: 10px; */
+}
+
+.ce-popup-actions .btn-popup-action {
+    display: flex;
     justify-content: flex-end;
     gap: 10px;
 }
