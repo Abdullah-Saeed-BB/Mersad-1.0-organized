@@ -2,9 +2,5 @@
 backup/
 src/assets/fonts/*/*
 
-# IDE AI Agent
-skills-lock.json
-.agents
-
 # unrelated to the project
 _*/
