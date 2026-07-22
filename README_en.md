@@ -1,21 +1,31 @@
+<img width="1919" height="448" alt="banner_en" src="https://github.com/user-attachments/assets/5854f59f-abb4-4d2f-99c2-78c096c555c1" />
+<div align="center">
+	<span><i>English</i></span> | <a href="https://github.com/Abdullah-Saeed-BB/mersad-with-midad/blob/main/README.md">عربي</a>
+</div>
+
 # Overview
 
 **Mirsad** is an application for managing and organizing visual production and photography workflows (inspired by the **Call Sheet** concept, but enhanced with a **Kanban** system). It was built as an integrated, open-source tool to help content creators and photographers organize their workflow from pre-production to post-production.
 Instead of relying on scattered files or multiple applications, Mirsad brings every stage of the production process into a single platform, making project management more organized and efficient.
 
 #### [Mirsad Overview by Hatem AlNajjar](https://www.youtube.com/watch?v=77tL-XDIPhk)
+<br/>
+<br/>
 
 # Features
 
 ## Task Management
+<img width="1919" height="448" alt="feature_1" src="https://github.com/user-attachments/assets/bbf80134-ebdf-40bf-a023-3fd93d148130" />
 
 Organize tasks and workflows using a **Kanban** board to track the status of every task and easily see what has been completed and what remains.
 
 ## Notes
+<img width="1919" height="448" alt="feature_2" src="https://github.com/user-attachments/assets/f72620ad-3b98-4105-b0fc-484539aa7d16" />
 
 Store notes, files, and links related to each project without switching between multiple applications.
 
 ## Midad AI Assistant
+<img width="1919" height="448" alt="feature_3" src="https://github.com/user-attachments/assets/c7e6d633-d368-4919-84fe-baefe192031f" />
 
 Your AI-powered writing assistant that can generate content from scratch or improve existing text, with the ability to reference previous content without copying and pasting.
 
