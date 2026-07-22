@@ -1,11 +1,6 @@
-# Frontend
-frontend/.firebase/
-frontend/backup/
-frontend/src/assets/fonts/*/*
-
-# Backend
-backend/backend/__pycache__/
-backend/.env
+.firebase/
+backup/
+src/assets/fonts/*/*
 
 # IDE AI Agent
 skills-lock.json
