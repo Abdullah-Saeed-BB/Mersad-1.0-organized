@@ -30,6 +30,12 @@
 1. Click the green **"Code"** button at the top of the page, then select **"Download ZIP"**.
 2. Extract the ZIP file to an easy-to-access location, such as your Desktop.
 3. Open the project folder, then open the `src/` folder. Right-click the `index.html` file and click **"Open"**.
+4. After launching the application, the first time you open **Midad**, you will be prompted to enter a **Gemini API Key**. You can obtain one for free from **Google AI Studio** by following these steps:
+	1. Sign in to **Google AI Studio**.
+	2. Go to the **Dashboard**, then open the **API Keys** page.
+	3. Click **Create API Key** in the upper-right corner of the page.
+	4. Click **Create Key**, then copy the generated API key using the **Copy** button next to it.
+
 ### (Optional) Install Thmanyah Fonts
 To install the Thmanyah fonts for Mersad, visit the official [Thmanyah Fonts](https://font.thmanyah.com/) website and download the font package. After downloading and extracting it, open the `thmanyah typeface` folder. You will find two main folders:
 
