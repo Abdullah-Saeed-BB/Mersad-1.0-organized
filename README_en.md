@@ -8,7 +8,8 @@
 **Mirsad** is an application for managing and organizing visual production and photography workflows (inspired by the **Call Sheet** concept, but enhanced with a **Kanban** system). It was built as an integrated, open-source tool to help content creators and photographers organize their workflow from pre-production to post-production.
 Instead of relying on scattered files or multiple applications, Mirsad brings every stage of the production process into a single platform, making project management more organized and efficient.
 
-#### [Mirsad Overview by Hatem AlNajjar](https://www.youtube.com/watch?v=77tL-XDIPhk)
+#### [Mirsad Overview by Hatem Al-Najjar](https://www.youtube.com/watch?v=77tL-XDIPhk)
+
 <br/>
 <br/>
 
@@ -29,6 +30,9 @@ Store notes, files, and links related to each project without switching between 
 
 Your AI-powered writing assistant that can generate content from scratch or improve existing text, with the ability to reference previous content without copying and pasting.
 
+<br/>
+<br/>
+
 # Installation & Setup
 
 ### Running Mirsad
@@ -39,7 +43,11 @@ Your AI-powered writing assistant that can generate content from scratch or impr
 
 ### (Optional) Enable the Midad AI Assistant
 
-1. After launching the application, the first time you open **Midad**, you will be asked to enter a **Gemini API Key**. You can obtain a free key from **[Google AI Studio](https://aistudio.google.com/)** by following these steps: 2. Sign in to **Google AI Studio**. 3. Go to the **Dashboard**, then open the **API Keys** page. 4. Click **Create API Key** in the top-right corner. 5. Click **Create Key**, then copy the generated key using the copy button next to it.
+1. After launching the application, the first time you open **Midad**, you will be asked to enter a **Gemini API Key**. You can obtain a free key from **[Google AI Studio](https://aistudio.google.com/)** by following these steps:
+	1. Sign in to **Google AI Studio**.
+	2. Go to the **Dashboard**, then open the **API Keys** page.
+	3. Click **Create API Key** in the top-right corner.
+	4. Click **Create Key**, then copy the generated key using the copy button next to it.
 
 ### (Optional) Install Thmanyah Fonts
 
@@ -58,6 +66,6 @@ To use **Thmanyah Fonts** in Mirsad instead of the system fonts:
 
 **Mirsad** is developed as an open-source project by:
 
-- **[Hatem AlNajjar](https://github.com/HatemAlNajjar)** — Project creator and lead developer, responsible for the application's design, user experience, and overall development.
+- **[Hatem Al-Najjar](https://github.com/HatemAlNajjar)** — Project creator and lead developer, responsible for the application's design, user experience, and overall development.
 - **[Abdullah Saeed](https://github.com/Abdullah-Saeed-BB)** — Developer of **Midad**, the AI-powered writing assistant for content creation.
 - **Contributors** — Everyone who contributes to the project by suggesting ideas, reporting issues, or submitting improvements through **Pull Requests**.
